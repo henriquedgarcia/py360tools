@@ -1,9 +1,9 @@
+from time import time
 from typing import Union
 
+import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
-
-import numpy as np
 
 unknown = None
 
@@ -93,7 +93,25 @@ def show2(projection: np.ndarray):
     frame_img.show()
 
 
-from time import time
+def show_array(nm_array: np.ndarray, shape: tuple = None):
+    """
+          M
+       +-->
+       |
+    n  v
+
+    :param nm_array: shape (2, ...)
+    :param shape: tuple (N, M)
+    :return: None
+    """
+    if shape is None:
+        shape = nm_array.shape[1:]
+        if len(shape) < 2:
+            shape = (np.max(nm_array[0]) + 1, np.max(nm_array[1]) + 1)
+    array2 = np.zeros(shape, dtype=int)[nm_array[0], nm_array[1]] = 255
+    Image.fromarray(array2).show()
+
+
 def test(func):
     print(f'Testing [{func.__name__}]: ', end='')
     start = time()
@@ -105,6 +123,7 @@ def test(func):
         pass
     final = time() - start
     print(f'Time = {final}')
+
 
 def check_deg(axis_name: str, value: float) -> float:
     """

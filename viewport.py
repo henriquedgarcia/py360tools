@@ -199,3 +199,32 @@ class Viewport(ViewportProps):
 
         self._vp_borders_xyz = get_borders(coord_nm=self.vp_rotated_xyz, thickness=thickness)
         return self._vp_borders_xyz
+
+
+def vp2cart(m, n, proj_shape, fov_shape):
+    """
+    Viewport generation with rectilinear projection
+
+    :param m:
+    :param n:
+    :param proj_shape: (H, W)
+    :param fov_shape: (fov_hor, fov_vert) in degree
+    :return:
+    """
+    proj_h, proj_w = proj_shape
+    fov_y, fov_x = map(np.deg2rad, fov_shape)
+    half_fov_x, half_fov_y = fov_x / 2, fov_y / 2
+
+    u = (m + 0.5) * 2 * np.tan(half_fov_x) / proj_w
+    v = (n + 0.5) * 2 * np.tan(half_fov_y) / proj_h
+
+    x = 1.
+    y = -v + np.tan(half_fov_y)
+    z = -u + np.tan(half_fov_x)
+
+    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+    x = x / r
+    y = y / r
+    z = z / r
+
+    return x, y, z
