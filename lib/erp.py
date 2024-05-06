@@ -3,7 +3,8 @@ from typing import Union
 import numpy as np
 from PIL import Image
 
-from .projectionbase import ProjBase, compose
+from .projectionbase import ProjBase
+from .util import compose
 
 
 class ERP(ProjBase):
@@ -24,7 +25,7 @@ class ERP(ProjBase):
             proj_shape = nm.shape[1:]
 
         shape = [2]
-        for i in range(len(nm.shape)-1):
+        for i in range(len(nm.shape) - 1):
             shape.append(1)
 
         n1 = np.asarray([0.5, 0.5]).reshape(shape)
@@ -37,7 +38,7 @@ class ERP(ProjBase):
     def vu2ea(vu: np.ndarray) -> np.ndarray:
 
         shape = [2]
-        for i in range(len(vu.shape)-1):
+        for i in range(len(vu.shape) - 1):
             shape.append(1)
 
         n1 = np.asarray([-np.pi, 2 * np.pi]).reshape(shape)
@@ -85,7 +86,7 @@ class ERP(ProjBase):
             proj_shape = vu.shape[1:]
 
         shape = [2]
-        for i in range(len(vu.shape)-1):
+        for i in range(len(vu.shape) - 1):
             shape.append(1)
 
         n1 = np.asarray([proj_shape[0], proj_shape[1]]).reshape(shape)
