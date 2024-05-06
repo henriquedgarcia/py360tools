@@ -18,7 +18,10 @@ def splitx(string: str) -> tuple[int, ...]:
     return tuple(map(int, string.split('x')))
 
 
-def get_borders(*, coord_nm: Union[tuple, np.ndarray] = None, shape=None, thickness=1):
+def get_borders(*,
+                coord_nm: Union[tuple, np.ndarray] = None,
+                shape=None,
+                thickness=1):
     """
     coord_nm must be shape==(C, N, M)
     :param coord_nm:
@@ -62,23 +65,17 @@ def rot_matrix(yaw_pitch_roll: Union[np.ndarray, list]) -> np.ndarray:
     sin_rot = np.sin(yaw_pitch_roll)
 
     # pitch
-    mat_x = np.array(
-        [[1, 0, 0],
-         [0, cos_rot[1], -sin_rot[1]],
-         [0, sin_rot[1], cos_rot[1]]]
-    )
+    mat_x = np.array([[1, 0, 0],
+                      [0, cos_rot[1], -sin_rot[1]],
+                      [0, sin_rot[1], cos_rot[1]]])
     # yaw
-    mat_y = np.array(
-        [[cos_rot[0], 0, sin_rot[0]],
-         [0, 1, 0],
-         [-sin_rot[0], 0, cos_rot[0]]]
-    )
+    mat_y = np.array([[cos_rot[0], 0, sin_rot[0]],
+                      [0, 1, 0],
+                      [-sin_rot[0], 0, cos_rot[0]]])
     # roll
-    mat_z = np.array(
-        [[cos_rot[2], -sin_rot[2], 0],
-         [sin_rot[2], cos_rot[2], 0],
-         [0, 0, 1]]
-    )
+    mat_z = np.array([[cos_rot[2], -sin_rot[2], 0],
+                      [sin_rot[2], cos_rot[2], 0],
+                      [0, 0, 1]])
 
     return mat_y @ mat_x @ mat_z
 
