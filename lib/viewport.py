@@ -3,58 +3,38 @@ from typing import Union, Callable, Optional
 import cv2
 import numpy as np
 
-from .util import unknown, rot_matrix, get_borders
+from .util import get_borders, rot_matrix
 
 
-class ViewportState:
-    _mat_rot: Optional[np.ndarray] = unknown
-    _rotated_normals: Optional[np.ndarray] = unknown
-    _vp_rotated_xyz: Optional[np.ndarray] = unknown
-    _vp_borders_xyz: Optional[np.ndarray] = unknown
-    _vp_img: Optional[np.ndarray] = unknown
-    _is_viewport: Optional[bool] = unknown
-
-    def clean_state(self):
-        self._mat_rot: Optional[np.ndarray] = unknown
-        self._rotated_normals: Optional[np.ndarray] = unknown
-        self._vp_rotated_xyz: Optional[np.ndarray] = unknown
-        self._vp_borders_xyz: Optional[np.ndarray] = unknown
-        self._vp_img: Optional[np.ndarray] = unknown
-        self._is_viewport: Optional[bool] = unknown
-
-
-class ViewportProps(ViewportState):
-    _yaw_pitch_roll: Optional[np.ndarray]
-    vp_coord_xyz: np.ndarray
+class ViewportProps:
     base_normals: np.ndarray
+    fov: np.ndarray
+    vp_xyz_base: np.ndarray
+    vp_shape: np.ndarray
+    base_vp_xyz: np.ndarray
+
+    _yaw_pitch_roll: np.ndarray
+
+    _mat_rot: Optional[np.ndarray] = None
+    _normals_rotated: Optional[np.ndarray] = None
+    _vp_rotated_xyz: Optional[np.ndarray] = None
+    _vp_img: Optional[np.ndarray] = None
 
     @property
-    def yaw_pitch_roll(self) -> np.ndarray:
+    def yaw_pitch_roll(self):
         return self._yaw_pitch_roll
 
     @yaw_pitch_roll.setter
-    def yaw_pitch_roll(self, value: np.ndarray):
-        """
-        Set a new position to viewport using aerospace's body coordinate system
-        and rotate the normals. Rotate the normal planes of viewport using matrix of rotation and Tait–Bryan
-        angles in Y-X-Z order. Refer to Wikipedia.
-
-        :param value: the positions like array(yaw, pitch, roll) in rad
-        """
+    def yaw_pitch_roll(self, value):
         self._yaw_pitch_roll = value
-        self.clean_state()
-
-    @property
-    def vp_rotated_xyz(self) -> np.ndarray:
-        if self._vp_rotated_xyz:
-            return self._vp_rotated_xyz
-
-        self._vp_rotated_xyz = np.tensordot(self.mat_rot, self.vp_coord_xyz, axes=1)
-        return self._vp_rotated_xyz
+        self._mat_rot = None
+        self._normals_rotated = None
+        self._vp_rotated_xyz = None
+        self._vp_img = None
 
     @property
     def mat_rot(self) -> np.ndarray:
-        if self._mat_rot:
+        if self._mat_rot is not None:
             return self._mat_rot
 
         self._mat_rot = rot_matrix(self.yaw_pitch_roll)
@@ -62,36 +42,38 @@ class ViewportProps(ViewportState):
 
     @property
     def rotated_normals(self) -> np.ndarray:
-        if self._rotated_normals:
-            return self._rotated_normals
+        if self._normals_rotated is not None:
+            return self._normals_rotated
 
-        self._rotated_normals = self.mat_rot @ self.base_normals
-        return self._rotated_normals
+        self._normals_rotated = np.tensordot(self.mat_rot, self.base_normals, axes=1)
+        return self._normals_rotated
+
+    @property
+    def vp_xyz_rotated(self) -> np.ndarray:
+        if self._vp_rotated_xyz is not None:
+            return self._vp_rotated_xyz
+
+        self._vp_rotated_xyz = np.tensordot(self.mat_rot, self.base_vp_xyz, axes=1)
+        return self._vp_rotated_xyz
 
 
 class Viewport(ViewportProps):
-    fov: np.ndarray = unknown
-    vp_shape: Union[np.ndarray, tuple] = unknown
-    vp_state: set = unknown
-
     def __init__(self, vp_shape: Union[np.ndarray, tuple], fov: np.ndarray):
         """
         Viewport Class used to extract view pixels in projections.
         The vp is an image as numpy array with shape (H, M, 3).
-        That can be RGB (matplotlib, pillow, etc) or BGR (opencv).
+        That can be RGB (matplotlib, pillow, etc.) or BGR (opencv).
 
         :param frame vp_shape: (600, 800) for 800x600px
         :param fov: in rad. Ex: "np.array((pi/2, pi/2))" for (90°x90°)
         """
         self.fov = fov
         self.vp_shape = vp_shape
-        self.vp_state = set()
-        self._make_base_normals()
-        self._make_base_vp_coord()
+        self._make_normals_base()
+        self._make_vp_xyz_base()
+        self.yaw_pitch_roll = np.array([0, 0, 0])
 
-        self._yaw_pitch_roll = np.array([0, 0, 0])
-
-    def _make_base_normals(self) -> None:
+    def _make_normals_base(self) -> None:
         """
         Com eixo entrando no observador, rotação horário é negativo e anti-horária
         é positivo. Todos os ângulos são radianos.
@@ -106,7 +88,7 @@ class Viewport(ViewportProps):
           centro (4 grandes círculos): cima, direita, baixo e esquerda.
         Os planos são definidos tal que suas normais (N) parte do centro e apontam na mesma direção a
           região do viewport. Ex: O plano de cima aponta para cima, etc.
-        Todos os pixels que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
+        Todos os píxeis que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
         O plano de cima possui inclinação de FOV_Y / 2.
           Sua normal é x=0,y=sin(FOV_Y/2 + pi/2), z=cos(FOV_Y/2 + pi/2)
         O plano de baixo possui inclinação de -FOV_Y / 2.
@@ -118,15 +100,16 @@ class Viewport(ViewportProps):
 
         :return:
         """
-        fov_y_2, fov_x_2 = self.fov / (2, 2)
-        pi_2 = np.pi / 2
+        fov_2 = self.fov / (2, 2)
+        cos_fov = np.cos(fov_2)
+        sin_fov = np.sin(fov_2)
 
-        self.base_normals = np.array([[0, -np.sin(fov_y_2 + pi_2), np.cos(fov_y_2 + pi_2)],  # top
-                                      [0, -np.sin(-fov_y_2 - pi_2), np.cos(-fov_y_2 - pi_2)],  # bottom
-                                      [np.sin(fov_x_2 + pi_2), 0, np.cos(fov_x_2 + pi_2)],  # left
-                                      [np.sin(-fov_x_2 - pi_2), 0, np.cos(-fov_x_2 - pi_2)]]).T  # right
+        self.base_normals = np.array([[0, -cos_fov[0], -sin_fov[0]],  # top
+                                      [0, cos_fov[0], -sin_fov[0]],  # bottom
+                                      [-cos_fov[1], 0, -sin_fov[1]],  # left
+                                      [cos_fov[1], 0, -sin_fov[1]]]).T  # right
 
-    def _make_base_vp_coord(self) -> None:
+    def _make_vp_xyz_base(self) -> None:
         """
         The VP projection is based in rectilinear projection.
 
@@ -138,15 +121,16 @@ class Viewport(ViewportProps):
         :return:
         """
         tan_fov_2 = np.tan(self.fov / 2)
-        x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], self.vp_shape[1], endpoint=False)
         y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], self.vp_shape[0], endpoint=True)
+        x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], self.vp_shape[1], endpoint=False)
 
-        (vp_coord_x, vp_coord_y), vp_coord_z = np.meshgrid(x_coord, y_coord), np.ones(self.vp_shape)
+        vp_coord_x, vp_coord_y = np.meshgrid(x_coord, y_coord)
+        vp_coord_z = np.ones(self.vp_shape)
         vp_coord_xyz_ = np.array([vp_coord_x, vp_coord_y, vp_coord_z])
 
         r = np.sqrt(np.sum(vp_coord_xyz_ ** 2, axis=0, keepdims=True))
-
-        self.vp_coord_xyz = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
+        # np.power
+        self.base_vp_xyz = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
 
     def is_viewport(self, x_y_z: np.ndarray) -> bool:
         """
@@ -159,34 +143,32 @@ class Viewport(ViewportProps):
         :return: A boolean         belong = np.all(inner_product <= 0, axis=0).reshape(self.shape)
 
         """
-        if self._is_viewport is not None:
-            return self._is_viewport
-
-        inner_prod = self.rotated_normals.T @ x_y_z
-        px_in_vp = np.all(inner_prod <= 0, axis=0)
-        self._is_viewport = np.any(px_in_vp)
-        return self._is_viewport
+        inner_prod = np.tensordot(self.rotated_normals.T, x_y_z, axes=1)
+        belong = np.all(inner_prod <= 0, axis=0)
+        is_vp = np.any(belong)
+        return is_vp
 
     def get_vp(self, frame: np.ndarray, xyz2nm: Callable) -> np.ndarray:
         """
 
-        :param frame: The projection image.
+        :param frame: The projection image. (N,M,C)
         :param xyz2nm: A function from 3D to projection.
         :return: The viewport image (RGB)
         """
-        if self._vp_img:
+        if self._vp_img is not None:
             return self._vp_img
 
-        nm_coord: np.ndarray
-        nm_coord = xyz2nm(self.vp_rotated_xyz, frame.shape)
+        nm_coord = xyz2nm(self.vp_xyz_rotated, frame.shape[:2])
         nm_coord = nm_coord.transpose((1, 2, 0))
         self._vp_img = cv2.remap(frame,
                                  map1=nm_coord[..., 1:2].astype(np.float32),
                                  map2=nm_coord[..., 0:1].astype(np.float32),
                                  interpolation=cv2.INTER_LINEAR,
                                  borderMode=cv2.BORDER_WRAP)
-        # show2(self._vp_img)
+        # show1(self._out)
         return self._vp_img
+
+    _vp_borders_xyz: np.ndarray
 
     def get_vp_borders_xyz(self, thickness: int = 1) -> np.ndarray:
         """
@@ -197,34 +179,5 @@ class Viewport(ViewportProps):
         if self._vp_borders_xyz:
             return self._vp_borders_xyz
 
-        self._vp_borders_xyz = get_borders(coord_nm=self.vp_rotated_xyz, thickness=thickness)
+        self._vp_borders_xyz = get_borders(coord_nm=self.vp_xyz_rotated, thickness=thickness)
         return self._vp_borders_xyz
-
-
-def vp2cart(m, n, proj_shape, fov_shape):
-    """
-    Viewport generation with rectilinear projection
-
-    :param m:
-    :param n:
-    :param proj_shape: (H, W)
-    :param fov_shape: (fov_hor, fov_vert) in degree
-    :return:
-    """
-    proj_h, proj_w = proj_shape
-    fov_y, fov_x = map(np.deg2rad, fov_shape)
-    half_fov_x, half_fov_y = fov_x / 2, fov_y / 2
-
-    u = (m + 0.5) * 2 * np.tan(half_fov_x) / proj_w
-    v = (n + 0.5) * 2 * np.tan(half_fov_y) / proj_h
-
-    x = 1.
-    y = -v + np.tan(half_fov_y)
-    z = -u + np.tan(half_fov_x)
-
-    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
-    x = x / r
-    y = y / r
-    z = z / r
-
-    return x, y, z
