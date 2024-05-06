@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Union, Callable
 
 import numpy as np
-from PIL import Image
 
 from .util import get_borders, show1, splitx
 from .viewport import Viewport
@@ -263,37 +262,3 @@ class ProjBase(Props,
         pass
 
 
-def compose(proj: ProjBase,
-            proj_frame_image: Image,
-            all_tiles_borders_image: Image,
-            vp_tiles_image: Image,
-            vp_mask_image: Image,
-            vp_borders_image: Image,
-            vp_image: Image,
-            ) -> Image:
-    height, width = proj_frame_image.height, proj_frame_image.width
-
-    # Composite mask with projection
-    cover_red = Image.new("RGB", (width, height), (255, 0, 0))
-    proj_frame_image_c = Image.composite(cover_red, proj_frame_image, mask=all_tiles_borders_image)
-
-    cover_green = Image.new("RGB", (width, height), (0, 255, 0))
-    proj_frame_image_c = Image.composite(cover_green, proj_frame_image_c, mask=vp_tiles_image)
-
-    cover_gray = Image.new("RGB", (width, height), (200, 200, 200))
-    proj_frame_image_c = Image.composite(cover_gray, proj_frame_image_c, mask=vp_mask_image)
-
-    cover_blue = Image.new("RGB", (width, height), (0, 0, 255))
-    proj_frame_image_c = Image.composite(cover_blue, proj_frame_image_c, mask=vp_borders_image)
-
-    # Resize Viewport
-    width_vp = int(np.round(height * vp_image.width / vp_image.height))
-    vp_image_resized = vp_image.resize((width_vp, height))
-
-    # Compose new image
-    new_im = Image.new('RGB', (width + width_vp + 2, height), (255, 255, 255))
-    new_im.paste(proj_frame_image_c, (0, 0))
-    new_im.paste(vp_image_resized, (width + 2, 0))
-
-    # new_im.show()
-    return new_im
