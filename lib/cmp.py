@@ -3,7 +3,8 @@ from typing import Union
 import numpy as np
 from PIL import Image
 
-from .projectionbase import ProjBase, compose
+from .projectionbase import ProjBase
+from .util import compose
 
 
 class Methods:
