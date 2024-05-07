@@ -25,55 +25,53 @@ class Attributes:
     yaw_pitch_roll: np.ndarray
 
 
-class TransformMethods:
-    @staticmethod
-    def xyz2ea(xyz: np.ndarray) -> np.ndarray:
-        """
-        Convert from cartesian system to horizontal coordinate system in radians
-        :param xyz: shape = (3, ...)
-        :return: np.ndarray([azimuth, elevation]) - in rad. shape = (2, ...)
-        """
-        ea = np.zeros((2,) + xyz.shape[1:])
+def normalize_ea(ea):
+    _90_deg = np.pi / 2
+    _180_deg = np.pi
+    _360_deg = 2 * np.pi
 
-        r = np.sqrt(xyz[0] ** 2 + xyz[1] ** 2 + xyz[2] ** 2)
+    new_ea = np.zeros(ea.shape)
+    new_ea[0] = -np.abs(np.abs(ea[0] + _90_deg) - _180_deg) + _90_deg
+    new_ea[1] = (ea[1] + _180_deg) % _360_deg - _180_deg
 
-        ea[0] = np.arcsin(-xyz[1] / r)
-        ea[1] = np.arctan2(xyz[0], xyz[2])
-        ea[1] = (ea[1] + np.pi) % (2*np.pi) - np.pi
-
-        return ea
-
-    @staticmethod
-    def ea2xyz(ae: np.ndarray) -> np.ndarray:
-        """
-        Convert from horizontal coordinate system  in radians to cartesian system.
-        ISO/IEC JTC1/SC29/WG11/N17197l: Algorithm descriptions of projection format conversion and video quality metrics in
-        360Lib Version 5
-        :param np.ndarray ae: In Rad. Shape == (2, ...)
-        :return: (x, y, z)
-        """
-        new_shape = (3,) + ae.shape[1:]
-        xyz = np.zeros(new_shape)
-        xyz[0] = np.cos(ae[0]) * np.sin(ae[1])
-        xyz[1] = -np.sin(ae[0])
-        xyz[2] = np.cos(ae[0]) * np.cos(ae[1])
-        xyz_r = np.round(xyz, 6)
-        return xyz_r
-
-    @staticmethod
-    def normalize_ea(ea):
-        _90_deg = np.pi / 2
-        _180_deg = np.pi
-        _360_deg = 2 * np.pi
-
-        new_ea = np.zeros(ea.shape)
-        new_ea[0] = -np.abs(np.abs(ea[0] + _90_deg) - _180_deg) + _90_deg
-        new_ea[1] = (ea[1] + _180_deg) % _360_deg - _180_deg
-
-        return new_ea
+    return new_ea
 
 
-class ViewportMethods(TransformMethods, Attributes):
+def ea2xyz(ae: np.ndarray) -> np.ndarray:
+    """
+    Convert from horizontal coordinate system  in radians to cartesian system.
+    ISO/IEC JTC1/SC29/WG11/N17197l: Algorithm descriptions of projection format conversion and video quality metrics in
+    360Lib Version 5
+    :param np.ndarray ae: In Rad. Shape == (2, ...)
+    :return: (x, y, z)
+    """
+    new_shape = (3,) + ae.shape[1:]
+    xyz = np.zeros(new_shape)
+    xyz[0] = np.cos(ae[0]) * np.sin(ae[1])
+    xyz[1] = -np.sin(ae[0])
+    xyz[2] = np.cos(ae[0]) * np.cos(ae[1])
+    xyz_r = np.round(xyz, 6)
+    return xyz_r
+
+
+def xyz2ea(xyz: np.ndarray) -> np.ndarray:
+    """
+    Convert from cartesian system to horizontal coordinate system in radians
+    :param xyz: shape = (3, ...)
+    :return: np.ndarray([azimuth, elevation]) - in rad. shape = (2, ...)
+    """
+    ea = np.zeros((2,) + xyz.shape[1:])
+
+    r = np.sqrt(xyz[0] ** 2 + xyz[1] ** 2 + xyz[2] ** 2)
+
+    ea[0] = np.arcsin(-xyz[1] / r)
+    ea[1] = np.arctan2(xyz[0], xyz[2])
+    ea[1] = (ea[1] + np.pi) % (2*np.pi) - np.pi
+
+    return ea
+
+
+class ViewportMethods(Attributes):
     def get_vp_image(self, frame_img: np.ndarray, yaw_pitch_roll=None) -> np.ndarray:
         if yaw_pitch_roll is not None:
             self.yaw_pitch_roll = yaw_pitch_roll
@@ -82,7 +80,7 @@ class ViewportMethods(TransformMethods, Attributes):
         return out
 
 
-class TilesMethods(TransformMethods, Attributes):
+class TilesMethods(Attributes):
     def get_tile_position_list(self):
         tile_position_list = []
         for n in range(0, self.proj_shape[0], self.tile_shape[0]):
@@ -201,7 +199,6 @@ class ProjBase(Props,
                DrawMethods,
                TilesMethods,
                ViewportMethods,
-               TransformMethods,
                ABC):
     def __init__(self, *, proj_res: str, tiling: str, fov: str, vp_shape: Union[np.ndarray, tuple, list] = None):
         # About projection
@@ -260,5 +257,3 @@ class ProjBase(Props,
         :return:
         """
         pass
-
-
