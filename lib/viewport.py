@@ -88,7 +88,7 @@ class Viewport(ViewportProps):
           centro (4 grandes círculos): cima, direita, baixo e esquerda.
         Os planos são definidos tal que suas normais (N) parte do centro e apontam na mesma direção a
           região do viewport. Ex: O plano de cima aponta para cima, etc.
-        Todos os píxeis que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
+        Todos os píxels que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
         O plano de cima possui inclinação de FOV_Y / 2.
           Sua normal é x=0,y=sin(FOV_Y/2 + pi/2), z=cos(FOV_Y/2 + pi/2)
         O plano de baixo possui inclinação de -FOV_Y / 2.
