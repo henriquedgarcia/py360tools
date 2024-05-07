@@ -1,10 +1,10 @@
 from typing import Union
 
 import numpy as np
-from PIL import Image
+# from PIL import Image
 
-from .projectionbase import ProjBase
-from .util import compose
+from .projectionbase import ProjBase, ea2xyz, xyz2ea
+# from .util import compose
 
 
 class ERP(ProjBase):
@@ -16,7 +16,7 @@ class ERP(ProjBase):
 
         vu = self.erp2vu(nm, proj_shape=proj_shape)
         ea = self.vu2ea(vu)
-        xyz = self.ea2xyz(ea)  # common
+        xyz = ea2xyz(ea)  # common
         return xyz
 
     @staticmethod
@@ -61,7 +61,7 @@ class ERP(ProjBase):
         if proj_shape is None:
             proj_shape = xyz.shape[:2]
 
-        ea = self.xyz2ea(xyz)
+        ea = xyz2ea(xyz)
         vu = self.ea2vu(ea)
         nm = self.vu2nm(vu, proj_shape)
 
@@ -98,20 +98,20 @@ class ERP(ProjBase):
     #############################
 
 
-def test_erp():
-    # erp '144x72', '288x144','432x216','576x288'
-    yaw_pitch_roll = np.deg2rad((70, 0, 0))
-    height, width = 288, 576
-
-    ########################################
-    # Open Image
-    frame_img: Union[Image, list] = Image.open('images/erp1.jpg')
-    frame_img = frame_img.resize((width, height))
-
-    erp = ERP(tiling='6x4', proj_res=f'{width}x{height}', fov='100x90')
-    erp.yaw_pitch_roll = yaw_pitch_roll
-    compose(erp, frame_img)
-
-
-if __name__ == '__main__':
-    test_erp()
+# def test_erp():
+#     # erp '144x72', '288x144','432x216','576x288'
+#     yaw_pitch_roll = np.deg2rad((70, 0, 0))
+#     height, width = 288, 576
+#
+#     ########################################
+#     # Open Image
+#     frame_img: Union[Image, list] = Image.open('images/erp1.jpg')
+#     frame_img = frame_img.resize((width, height))
+#
+#     erp = ERP(tiling='6x4', proj_res=f'{width}x{height}', fov='100x90')
+#     erp.yaw_pitch_roll = yaw_pitch_roll
+#     compose(erp, frame_img)
+#
+#
+# if __name__ == '__main__':
+#     test_erp()
