@@ -25,7 +25,8 @@ class Attributes:
     yaw_pitch_roll: np.ndarray
 
 
-def normalize_ea(ea):
+def normalize_ea(*,
+                 ea):
     _90_deg = np.pi / 2
     _180_deg = np.pi
     _360_deg = 2 * np.pi
@@ -37,24 +38,25 @@ def normalize_ea(ea):
     return new_ea
 
 
-def ea2xyz(ae: np.ndarray) -> np.ndarray:
+def ea2xyz(*,
+           ea: np.ndarray) -> np.ndarray:
     """
     Convert from horizontal coordinate system  in radians to cartesian system.
     ISO/IEC JTC1/SC29/WG11/N17197l: Algorithm descriptions of projection format conversion and video quality metrics in
     360Lib Version 5
-    :param np.ndarray ae: In Rad. Shape == (2, ...)
+    :param np.ndarray ea: In Rad. Shape == (2, ...)
     :return: (x, y, z)
     """
-    new_shape = (3,) + ae.shape[1:]
+    new_shape = (3,) + ea.shape[1:]
     xyz = np.zeros(new_shape)
-    xyz[0] = np.cos(ae[0]) * np.sin(ae[1])
-    xyz[1] = -np.sin(ae[0])
-    xyz[2] = np.cos(ae[0]) * np.cos(ae[1])
+    xyz[0] = np.cos(ea[0]) * np.sin(ea[1])
+    xyz[1] = -np.sin(ea[0])
+    xyz[2] = np.cos(ea[0]) * np.cos(ea[1])
     xyz_r = np.round(xyz, 6)
     return xyz_r
 
 
-def xyz2ea(xyz: np.ndarray) -> np.ndarray:
+def xyz2ea(*, xyz: np.ndarray) -> np.ndarray:
     """
     Convert from cartesian system to horizontal coordinate system in radians
     :param xyz: shape = (3, ...)
