@@ -107,7 +107,7 @@ def vu2erp(*,
 
     n1 = np.asarray([proj_shape[0], proj_shape[1]]).reshape(shape)
 
-    nm = vu * n1
+    nm = vu * (n1 - 1)
     nm = np.floor(nm)
     return nm.astype(int)
 
