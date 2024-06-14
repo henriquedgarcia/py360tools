@@ -202,7 +202,14 @@ class ProjBase(Props,
                TilesMethods,
                ViewportMethods,
                ABC):
-    def __init__(self, *, proj_res: str, tiling: str, fov: str, vp_shape: Union[np.ndarray, tuple, list] = None):
+    def __init__(self, *, proj_res: str, fov: str, tiling: str = '1x1', vp_shape: Union[np.ndarray, tuple, list] = None):
+        """
+
+        @param proj_res: A string representing the projection resolution. e.g. '600x3000'
+        @param fov: A string representing the fov. e.g. '100x90'
+        @param tiling: A string representing the tiling. e.g. '1x1' or '3x2
+        @param vp_shape: A tuple, or nd.array or list with shape of viewport. e.g. (300, 600) - (height, width)
+        """
         # About projection
         self.proj_res = proj_res
         self.proj_shape = np.array(splitx(self.proj_res)[::-1], dtype=int)
