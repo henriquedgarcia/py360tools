@@ -235,13 +235,13 @@ def mse2psnr(_mse: float) -> float:
     return 10 * np.log10((255. ** 2 / _mse))
 
 
-def compose(proj_frame_image: Image,
-            all_tiles_borders_image: Image,
-            vp_tiles_image: Image,
-            vp_mask_image: Image,
-            vp_borders_image: Image,
-            vp_image: Image,
-            ) -> Image:
+def compose_old(proj_frame_image: Image,
+                all_tiles_borders_image: Image,
+                vp_tiles_image: Image,
+                vp_mask_image: Image,
+                vp_borders_image: Image,
+                vp_image: Image,
+                ) -> Image:
     height, width = proj_frame_image.height, proj_frame_image.width
 
     # Composite mask with projection
@@ -268,3 +268,15 @@ def compose(proj_frame_image: Image,
 
     # new_im.show()
     return new_im
+
+
+def compose(img: np.ndarray,
+            mask: np.ndarray,
+            color: Union[tuple[int], tuple[int, int, int]] = (255,),
+            mask_opacity: float = 1.0
+            ):
+    assert img.shape[:2] == mask.shape[:2], "Image and mask must be the same shape"
+
+    mask_opacity = np.array(mask_opacity)
+    img[mask > 0] = (img[mask > 0] * (1 - mask_opacity) + color * mask_opacity).astype('uint8')
+    return img
