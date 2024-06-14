@@ -170,7 +170,7 @@ class DrawMethods(TilesMethods, Attributes):
         # self.canvas[belong] = lum
         return self.canvas.copy()
 
-    def draw_vp_borders(self, lum=255, thickness=1):
+    def draw_vp_borders(self, thickness=1, lum=255):
         """
         Project the sphere using ERP. Where is Viewport the
         :param lum: value to draw line
