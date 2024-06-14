@@ -6,17 +6,17 @@ class lib.projectionbase.ProjBase(*, proj_res, fov, tiling = '1x1', vp_shape: = 
 ```
 
 **Parameters**
-- `proj_res`: str<br/>
+- `proj_res`: str<br>
 &nbsp;&nbsp;&nbsp;&nbsp; A string representing the projection resolution, e.g., '600x3000'.
-- `fov`: str<br/>
+- `fov`: str<br>
 &nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g., '100x90'.
-- `tiling` (optional): str <br/>
+- `tiling` (optional): str <br>
 &nbsp;&nbsp;&nbsp;&nbsp; A string representing the tiling, e.g., '1x1' or '3x2'.
-- `vp_shape`:  2-tuple or ndarray<br/>
+- `vp_shape`:  2-tuple or ndarray<br>
 &nbsp;&nbsp;&nbsp;&nbsp; The shape of the viewport, e.g., (300, 600) (height, width).
 
 **Attributes**
-- `yaw_pitch_roll`: 3-tuple or ndarray<br/> 
+- `yaw_pitch_roll`: 3-tuple or ndarray<br> 
 &nbsp;&nbsp;&nbsp;&nbsp; A tuple or ndarray with three angles in radian. 
 
 ## Examples
@@ -104,13 +104,13 @@ Image.fromarray(vp_image).show()
 ### ```lib.util.get_borders(*, coord_nm=None, shape=None, thickness=1)```
 
 **Parameters**
-- `coord_nm`: ndarray <br/>
+- `coord_nm`: ndarray <br>
 &nbsp;&nbsp;&nbsp;&nbsp; coord_nm must be a ndarray with shape==(chanel(C), height(N), width(M))
-- `shape`: 2-tuple or ndarray<br/>
+- `shape`: 2-tuple or ndarray<br>
 &nbsp;&nbsp;&nbsp;&nbsp; A alternative shape, case coord_nm is a lists. (height, width) 
-- `thickness`: int <br/>
+- `thickness`: int <br>
 &nbsp;&nbsp;&nbsp;&nbsp; The border thickness in pixels
 
 **Return**
-- ndarray<br/>
+- ndarray<br>
 &nbsp;&nbsp;&nbsp;&nbsp; A ndarray with shape == (C, thickness*(2N+2M))
