@@ -152,7 +152,7 @@ class DrawMethods(TilesMethods, Attributes):
             self.draw_tile_border(idx=int(tile), lum=lum)
         return self.canvas.copy()
 
-    def draw_vp_mask(self, lum=200) -> np.ndarray:
+    def draw_vp_mask(self, lum=255) -> np.ndarray:
         """
         Project the sphere using ERP. Where is Viewport the
         :param lum: value to draw line
