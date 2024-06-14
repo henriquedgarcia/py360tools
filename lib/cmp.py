@@ -5,12 +5,6 @@ import numpy as np
 from .projectionbase import ProjBase, ea2xyz, xyz2ea
 
 
-# from PIL import Image
-
-
-# from .util import compose
-
-
 class CMP(ProjBase):
     faces_list = []
 
@@ -412,20 +406,3 @@ def cmp2ea_face(*,
     xyz, face = cmp2xyz_face(nm=nm)
     ae = xyz2ea(xyz=xyz)
     return ae, face
-
-# def test_cmp():
-#     # cmp '144x96', '288x192','432x288','576x384'
-#     yaw_pitch_roll = np.deg2rad((70, 0, 0))
-#     height, width = 384, 576
-#
-#     # Open Image
-#     frame_img: Union[Image, list] = Image.open('images/cmp1.png')
-#     frame_img = frame_img.resize((width, height))
-#
-#     cmp = CMP(tiling='6x4', proj_res=f'{width}x{height}', fov='110x90')
-#     cmp.yaw_pitch_roll = yaw_pitch_roll
-#     compose(cmp, frame_img)
-#
-#
-# if __name__ == '__main__':
-#     test_cmp()
