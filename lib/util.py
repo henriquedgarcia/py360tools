@@ -21,7 +21,8 @@ def splitx(string: str) -> tuple[int, ...]:
 def get_borders(*,
                 coord_nm: Union[tuple, np.ndarray] = None,
                 shape=None,
-                thickness=1):
+                thickness=1
+                ):
     """
     coord_nm must be shape==(C, N, M)
     :param coord_nm:
@@ -147,7 +148,8 @@ def check_deg(axis_name: str, value: float) -> float:
 
 def lin_interpol(t: float,
                  t_f: float, t_i: float,
-                 v_f: np.ndarray, v_i: np.ndarray) -> np.ndarray:
+                 v_f: np.ndarray, v_i: np.ndarray
+                 ) -> np.ndarray:
     m: np.ndarray = (v_f - v_i) / (t_f - t_i)
     v: np.ndarray = m * (t - t_i) + v_i
     return v
