@@ -3,13 +3,14 @@ from typing import Union, Callable
 
 import numpy as np
 
-from .util import get_borders, show1, splitx
-from .viewport import Viewport
+from models.tiling import Tiling, Tile
+from utils.util import get_borders_value, show, splitx
+from utils.viewport import Viewport
 
 
 class Attributes:
     canvas: np.ndarray
-    frame_img = np.zeros([0])
+    frame_img: np.ndarray  # = np.zeros([0])
     n_tiles: int
     nm2xyz: Callable
     proj_coord_xyz: np.ndarray
@@ -19,62 +20,22 @@ class Attributes:
     tile_borders_xyz: list
     tile_position_list: list
     tile_shape: Union[np.ndarray, tuple]
-    tiling: str
+    tiling: Tiling
     viewport: Viewport
     xyz2nm: Callable
     yaw_pitch_roll: np.ndarray
 
 
-def normalize_ea(*,
-                 ea):
-    _90_deg = np.pi / 2
-    _180_deg = np.pi
-    _360_deg = 2 * np.pi
-
-    new_ea = np.zeros(ea.shape)
-    new_ea[0] = -np.abs(np.abs(ea[0] + _90_deg) - _180_deg) + _90_deg
-    new_ea[1] = (ea[1] + _180_deg) % _360_deg - _180_deg
-
-    return new_ea
-
-
-def ea2xyz(*,
-           ea: np.ndarray) -> np.ndarray:
-    """
-    Convert from horizontal coordinate system  in radians to cartesian system.
-    ISO/IEC JTC1/SC29/WG11/N17197l: Algorithm descriptions of projection format conversion and video quality metrics in
-    360Lib Version 5
-    :param np.ndarray ea: In Rad. Shape == (2, ...)
-    :return: (x, y, z)
-    """
-    new_shape = (3,) + ea.shape[1:]
-    xyz = np.zeros(new_shape)
-    xyz[0] = np.cos(ea[0]) * np.sin(ea[1])
-    xyz[1] = -np.sin(ea[0])
-    xyz[2] = np.cos(ea[0]) * np.cos(ea[1])
-    xyz_r = np.round(xyz, 6)
-    return xyz_r
-
-
-def xyz2ea(*, xyz: np.ndarray) -> np.ndarray:
-    """
-    Convert from cartesian system to horizontal coordinate system in radians
-    :param xyz: shape = (3, ...)
-    :return: np.ndarray([azimuth, elevation]) - in rad. shape = (2, ...)
-    """
-    ea = np.zeros((2,) + xyz.shape[1:])
-
-    r = np.sqrt(xyz[0] ** 2 + xyz[1] ** 2 + xyz[2] ** 2)
-
-    ea[0] = np.arcsin(-xyz[1] / r)
-    ea[1] = np.arctan2(xyz[0], xyz[2])
-    ea[1] = (ea[1] + np.pi) % (2*np.pi) - np.pi
-
-    return ea
-
-
 class ViewportMethods(Attributes):
-    def get_vp_image(self, frame_img: np.ndarray, yaw_pitch_roll=None) -> np.ndarray:
+    def get_viewport_image(self, frame_img, yaw_pitch_roll=None) -> np.ndarray:
+        """
+
+        :param frame_img: A full frame of the projection
+        :type frame_img: np.ndarray
+        :param yaw_pitch_roll: A tuple or ndarray with the yaw, pitch and roll angles of the viewport
+        :type yaw_pitch_roll: np.ndarray | tuple
+        :return:
+        """
         if yaw_pitch_roll is not None:
             self.yaw_pitch_roll = yaw_pitch_roll
 
@@ -83,74 +44,78 @@ class ViewportMethods(Attributes):
 
 
 class TilesMethods(Attributes):
-    def get_tile_position_list(self):
-        tile_position_list = []
-        for n in range(0, self.proj_shape[0], self.tile_shape[0]):
-            for m in range(0, self.proj_shape[1], self.tile_shape[1]):
-                tile_position_list.append((n, m))
-        return np.array(tile_position_list)
-
-    def get_tile_borders_nm(self):
-        tile_borders_nm = []
-        for tile in range(self.n_tiles):
-            tile_position = self.tile_position_list[tile].reshape(2, -1)
-            tile_borders_nm.append(self.tile_border_base + tile_position)
-        return np.array(tile_borders_nm)
-
-    def get_tile_borders_xyz(self):
-        tile_borders_xyz = []
-        for tile in range(self.n_tiles):
-            borders_nm = self.tile_borders_nm[tile]
-            borders_xyz = self.nm2xyz(nm=borders_nm, proj_shape=self.proj_shape)
-            tile_borders_xyz.append(borders_xyz)
-        return tile_borders_xyz
-
-    def get_vptiles(self, yaw_pitch_roll=None) -> list[str]:
+    def get_tiles_position_nm(self, tile_id):
         """
 
+        :param tile_id: tile index value
+        :type tile_id: int | str
+        :return: A ndarray with the tile position in projection
+        :rtype: np.ndarray
+        """
+        return self.tiling.tiles[int(tile_id)].pixel_position
+
+    def get_tile_borders_nm(self, tile_id):
+        """
+        :param tile_id: tile index value
+        :type tile_id: int | str
+        :return: A ndarray with shape == (ntiles, 2), with the tile borders in (n, m) coords
+        :rtype: np.ndarray
+        """
+        return self.tile_border_base + self.get_tiles_position_nm(tile_id)
+
+    def get_tile_borders_xyz(self, tile_id):
+        """
+        :param tile_id: tile index value
+        :type tile_id: int | str
+        :return: A ndarray with shape == (ntiles, 3), with the tile borders in (x, y, z) coords
+        :rtype: np.ndarray
+        """
+        return self.nm2xyz(nm=self.get_tile_borders_nm(tile_id), proj_shape=self.proj_shape)
+
+    def get_vptiles(self, yaw_pitch_roll=None):
+        """
+
+        :param yaw_pitch_roll: yaw, pitch and roll angles of the viewport
+        :type yaw_pitch_roll: np.ndarray | tuple
         :return:
+        :rtype: list[Tile]
         """
-        if self.tiling == '1x1': return ['0']
+        if self.tiling == '1x1': return [self.tiling.tiles[0]]
 
         if yaw_pitch_roll is not None:
             self.yaw_pitch_roll = yaw_pitch_roll
 
         vptiles = []
-        for tile in range(self.n_tiles):
-            if self.viewport.is_viewport(self.tile_borders_xyz[tile]):
-                vptiles.append(str(tile))
+        for tile in self.tiling.tiles:
+            if self.viewport.is_viewport(self.get_tile_borders_xyz(tile.tile_id)):
+                vptiles.append(tile)
         return vptiles
 
 
 class DrawMethods(TilesMethods, Attributes):
-    def clear_projection(self):
-        self.canvas[...] = 0
-
-    def show(self):
-        show1(self.canvas)
-
     def draw_tile_border(self, idx, lum=255) -> np.ndarray:
         """
         Do not return copy
         :param idx:
+        :type idx: int
         :param lum:
         :return:
         """
-        n, m = self.tile_borders_nm[idx]
-        self.canvas[n, m] = lum
-        return self.canvas
+        canvas = np.zeros(self.proj_shape, dtype='uint8')
+        canvas[self.get_tile_borders_nm(idx)] = lum
+        return canvas
 
     def draw_all_tiles_borders(self, lum=255):
-        self.clear_projection()
-        for tile in range(self.n_tiles):
-            self.draw_tile_border(idx=tile, lum=lum)
-        return self.canvas.copy()
+        canvas = np.zeros(self.proj_shape, dtype='uint8')
+        for tile in self.tiling.tiles:
+            canvas = canvas + self.draw_tile_border(idx=int(tile), lum=lum)
+        return canvas
 
     def draw_vp_tiles(self, lum=255):
-        self.clear_projection()
+        canvas = np.zeros(self.proj_shape, dtype='uint8')
         for tile in self.get_vptiles():
-            self.draw_tile_border(idx=int(tile), lum=lum)
-        return self.canvas.copy()
+            canvas = canvas + self.draw_tile_border(idx=int(tile), lum=lum)
+        return canvas
 
     def draw_vp_mask(self, lum=255) -> np.ndarray:
         """
@@ -158,17 +123,13 @@ class DrawMethods(TilesMethods, Attributes):
         :param lum: value to draw line
         :return: a numpy.ndarray with one deep color
         """
-        self.clear_projection()
-        proj_coord_xyz = self.proj_coord_xyz
-        rotated_normals = self.viewport.rotated_normals
+        canvas = np.zeros(self.proj_shape, dtype='uint8')
 
-        inner_prod = np.tensordot(rotated_normals.T, proj_coord_xyz, axes=1)
+        inner_prod = np.tensordot(self.viewport.rotated_normals.T, self.proj_coord_xyz, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
-        self.canvas[belong] = lum
+        canvas[belong] = lum
 
-        # belong = np.all(inner_product <= 0, axis=0)
-        # self.canvas[belong] = lum
-        return self.canvas.copy()
+        return canvas
 
     def draw_vp_borders(self, thickness=1, lum=255):
         """
@@ -177,12 +138,12 @@ class DrawMethods(TilesMethods, Attributes):
         :param thickness: in pixel.
         :return: a numpy.ndarray with one deep color
         """
+        canvas = np.zeros(self.proj_shape, dtype='uint8')
 
-        self.clear_projection()
-        vp_borders_xyz = get_borders(coord_nm=self.viewport.vp_xyz_rotated, thickness=thickness)
+        vp_borders_xyz = get_borders_value(array=self.viewport.vp_xyz_rotated, thickness=thickness)
         nm = self.xyz2nm(vp_borders_xyz, proj_shape=self.proj_shape).astype(int)
-        self.canvas[nm[0, ...], nm[1, ...]] = lum
-        return self.canvas.copy()
+        canvas[nm[0, ...], nm[1, ...]] = lum
+        return canvas
 
 
 class Props(Attributes):
@@ -215,7 +176,6 @@ class ProjBase(Props,
         self.proj_shape = np.array(splitx(self.proj_res)[::-1], dtype=int)
         self.proj_h = self.proj_shape[0]
         self.proj_w = self.proj_shape[1]
-        self.canvas = np.zeros(self.proj_shape, dtype='uint8')
         self.proj_coord_nm = np.mgrid[0:self.proj_h, 0:self.proj_w]
         self.proj_coord_xyz = self.nm2xyz(self.proj_coord_nm, self.proj_shape)
 
@@ -230,8 +190,8 @@ class ProjBase(Props,
         self.tile_shape = (self.proj_shape / self.tiling_shape).astype(int)
         self.tile_h = self.tile_shape[0]
         self.tile_w = self.tile_shape[1]
-        self.tile_position_list = self.get_tile_position_list()
-        self.tile_border_base = get_borders(shape=self.tile_shape)
+        self.tile_position_list = self.get_tiles_position_nm()
+        self.tile_border_base = get_borders_value(array=np.mgrid[0:self.tile_shape[0], 0:self.tile_shape[1]])
         self.tile_borders_nm = self.get_tile_borders_nm()
         self.tile_borders_xyz = self.get_tile_borders_xyz()
 
