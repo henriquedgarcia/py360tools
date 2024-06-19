@@ -2,7 +2,8 @@ from typing import Union
 
 import numpy as np
 
-from .projectionbase import ProjBase, ea2xyz, xyz2ea
+from projections.projectionbase import ProjBase
+from utils.transform import ea2xyz, xyz2ea
 
 
 class CMP(ProjBase):
