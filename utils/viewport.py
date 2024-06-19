@@ -3,7 +3,8 @@ from typing import Union, Callable, Optional
 import cv2
 import numpy as np
 
-from .util import get_borders, rot_matrix
+from .util import get_borders_value
+from .transform import rot_matrix
 
 
 class ViewportProps:
@@ -179,5 +180,5 @@ class Viewport(ViewportProps):
         if self._vp_borders_xyz:
             return self._vp_borders_xyz
 
-        self._vp_borders_xyz = get_borders(coord_nm=self.vp_xyz_rotated, thickness=thickness)
+        self._vp_borders_xyz = get_borders_value(array=self.vp_xyz_rotated, thickness=thickness)
         return self._vp_borders_xyz
