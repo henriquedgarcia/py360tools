@@ -4,7 +4,7 @@ from typing import Union, Callable
 import numpy as np
 
 from models.tiling import Tiling, Tile
-from utils.util import get_borders_value, show, splitx
+from utils.util import get_borders_value, splitx, show
 from utils.viewport import Viewport
 
 
@@ -61,7 +61,7 @@ class TilesMethods(Attributes):
         :return: A ndarray with shape == (ntiles, 2), with the tile borders in (n, m) coords
         :rtype: np.ndarray
         """
-        return self.tile_border_base + self.get_tiles_position_nm(tile_id)
+        return self.tile_border_base + self.get_tiles_position_nm(tile_id).reshape((2, -1))
 
     def get_tile_borders_xyz(self, tile_id):
         """
@@ -80,7 +80,7 @@ class TilesMethods(Attributes):
         :return:
         :rtype: list[Tile]
         """
-        if self.tiling == '1x1': return [self.tiling.tiles[0]]
+        if str(self.tiling) == '1x1': return [self.tiling.tiles[0]]
 
         if yaw_pitch_roll is not None:
             self.yaw_pitch_roll = yaw_pitch_roll
@@ -93,6 +93,10 @@ class TilesMethods(Attributes):
 
 
 class DrawMethods(TilesMethods, Attributes):
+    @staticmethod
+    def show(value):
+        show(value)
+
     def draw_tile_border(self, idx, lum=255) -> np.ndarray:
         """
         Do not return copy
@@ -102,7 +106,7 @@ class DrawMethods(TilesMethods, Attributes):
         :return:
         """
         canvas = np.zeros(self.proj_shape, dtype='uint8')
-        canvas[self.get_tile_borders_nm(idx)] = lum
+        canvas[self.get_tile_borders_nm(idx)[0], self.get_tile_borders_nm(idx)[1]] = lum
         return canvas
 
     def draw_all_tiles_borders(self, lum=255):
@@ -163,7 +167,8 @@ class ProjBase(Props,
                TilesMethods,
                ViewportMethods,
                ABC):
-    def __init__(self, *, proj_res: str, fov: str, tiling: str = '1x1', vp_shape: Union[np.ndarray, tuple, list] = None):
+    def __init__(self, *, proj_res: str, fov: str, tiling: str = '1x1', vp_shape: Union[np.ndarray, tuple, list] = None
+                 ):
         """
 
         @param proj_res: A string representing the projection resolution. e.g. '600x3000'
@@ -180,20 +185,16 @@ class ProjBase(Props,
         self.proj_coord_xyz = self.nm2xyz(self.proj_coord_nm, self.proj_shape)
 
         # About Tiling
-        self.tiling = tiling
-        self.tiling_shape = np.array(splitx(self.tiling)[::-1], dtype=int)
-        self.tiling_h = self.tiling_shape[0]
-        self.tiling_w = self.tiling_shape[1]
+        self.tiling = Tiling(tiling, self.proj_shape)
 
         # About Tiles
-        self.n_tiles = self.tiling_h * self.tiling_w
-        self.tile_shape = (self.proj_shape / self.tiling_shape).astype(int)
-        self.tile_h = self.tile_shape[0]
-        self.tile_w = self.tile_shape[1]
-        self.tile_position_list = self.get_tiles_position_nm()
+        self.n_tiles = self.tiling.ntiles
+        self.tile_shape = self.tiling.tiles[0].shape
+
+        self.tile_position_list = [self.get_tiles_position_nm(int(tile)) for tile in self.tiling.tiles]
         self.tile_border_base = get_borders_value(array=np.mgrid[0:self.tile_shape[0], 0:self.tile_shape[1]])
-        self.tile_borders_nm = self.get_tile_borders_nm()
-        self.tile_borders_xyz = self.get_tile_borders_xyz()
+        self.tile_borders_nm = np.array([self.get_tile_borders_nm(int(tile)) for tile in self.tiling.tiles])
+        self.tile_borders_xyz = [self.get_tile_borders_xyz(int(tile)) for tile in self.tiling.tiles]
 
         # About Viewport
         self.fov = fov
