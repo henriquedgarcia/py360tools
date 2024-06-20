@@ -1,47 +1,148 @@
+import pickle
+import unittest
+from pathlib import Path
 from typing import Union
 
 import numpy as np
 from PIL import Image
 
-from erp import ERP
-from pathlib import Path
-import pickle
-from util import test
+from projections.erp import ERP
+from utils.transform import erp_erp2vu
+from utils.util import test, show
 
-class TestERP:
+show = show
+__FILENAME__ = Path(__file__).absolute()
+__PATH__ = __FILENAME__.parent
+
+
+class TestErp(unittest.TestCase):
+    projection: ERP
+
+    @classmethod
+    def setUpClass(cls):
+        # erp '144x72', '288x144','432x216','576x288'
+        # cmp '144x96', '288x192','432x288','576x384'
+        height, width = 288, 576
+
+        cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}', fov='110x90')
+        cls.projection.yaw_pitch_roll = np.deg2rad((70, 0, 0))
+
+        # Open Image
+        frame_img: Image = Image.open('images/erp1.png')
+        frame_img = frame_img.resize((width, height))
+        cls.frame_array = np.array(frame_img)
+
+    draw_all_tiles_borders_test_file = Path(f'{__PATH__}/assets/draw_all_tiles_borders_test_file.pickle')
+
+    def test_draw_all_tiles_borders(self):
+        draw_all_tiles_borders = self.projection.draw_all_tiles_borders()
+
+        try:
+            draw_all_tiles_borders_test = pickle.loads(self.draw_all_tiles_borders_test_file.read_bytes())
+        except FileNotFoundError:
+            self.draw_all_tiles_borders_test_file.write_bytes(pickle.dumps(draw_all_tiles_borders))
+            draw_all_tiles_borders_test = pickle.loads(self.draw_all_tiles_borders_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(draw_all_tiles_borders_test == draw_all_tiles_borders))
+
+    draw_vp_borders_test_file = Path(f'{__PATH__}/assets/draw_vp_borders_test_file.pickle')
+
+    def test_draw_vp_borders(self):
+        draw_vp_borders = self.projection.draw_vp_borders()
+
+        try:
+            draw_vp_borders_test = pickle.loads(self.draw_vp_borders_test_file.read_bytes())
+        except FileNotFoundError:
+            self.draw_vp_borders_test_file.write_bytes(pickle.dumps(draw_vp_borders))
+            draw_vp_borders_test = pickle.loads(self.draw_vp_borders_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(draw_vp_borders_test == draw_vp_borders))
+
+    draw_vp_mask_test_file = Path(f'{__PATH__}/assets/draw_vp_mask_test_file.pickle')
+
+    def test_draw_vp_mask(self):
+        draw_vp_mask = self.projection.draw_vp_mask()
+
+        try:
+            draw_vp_mask_test = pickle.loads(self.draw_vp_mask_test_file.read_bytes())
+        except FileNotFoundError:
+            self.draw_vp_mask_test_file.write_bytes(pickle.dumps(draw_vp_mask))
+            draw_vp_mask_test = pickle.loads(self.draw_vp_mask_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(draw_vp_mask_test == draw_vp_mask))
+
+    draw_vp_tiles_test_file = Path(f'{__PATH__}/assets/draw_vp_tiles_test_file.pickle')
+
+    def test_draw_vp_tiles(self):
+        draw_vp_tiles = self.projection.draw_vp_tiles()
+
+        try:
+            draw_vp_tiles_test = pickle.loads(self.draw_vp_tiles_test_file.read_bytes())
+        except FileNotFoundError:
+            self.draw_vp_tiles_test_file.write_bytes(pickle.dumps(draw_vp_tiles))
+            draw_vp_tiles_test = pickle.loads(self.draw_vp_tiles_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(draw_vp_tiles_test == draw_vp_tiles))
+
+    get_vptiles_test_file = Path(f'{__PATH__}/assets/get_vptiles_test_file.pickle')
+
+    def test_get_vptiles(self):
+        get_vptiles = self.projection.get_vptiles()
+        get_vptiles = np.array(get_vptiles)
+
+        try:
+            get_vptiles_test = pickle.loads(self.get_vptiles_test_file.read_bytes())
+        except FileNotFoundError:
+            self.get_vptiles_test_file.write_bytes(pickle.dumps(get_vptiles))
+            get_vptiles_test = pickle.loads(self.get_vptiles_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(get_vptiles_test == get_vptiles))
+
+    get_viewport_image_test_file = Path(f'{__PATH__}/assets/get_viewport_image_test_file.pickle')
+
+    def test_get_viewport_image(self):
+        get_viewport_image = self.projection.get_viewport_image(self.frame_array)
+
+        try:
+            get_viewport_image_test = pickle.loads(self.get_viewport_image_test_file.read_bytes())
+        except FileNotFoundError:
+            self.get_viewport_image_test_file.write_bytes(pickle.dumps(get_viewport_image))
+            get_viewport_image_test = pickle.loads(self.get_viewport_image_test_file.read_bytes())
+
+        self.assertTrue(np.alltrue(get_viewport_image_test == get_viewport_image))
+
+
+class TestErpOld(unittest.TestCase):
     nm_test: np.ndarray
     vu_test: np.ndarray
     xyz_test: np.ndarray
     ea_test: np.ndarray
+    nm_file = Path('data_test/ERP_nm.pickle')
+    vu_file = Path('data_test/ERP_vu.pickle')
 
-    def __init__(self):
-        self.load_arrays()
-        self.test()
+    @classmethod
+    def setUpClass(cls):
+        cls.load_nm_file()
+        cls.load_vu_file()
+        cls.load_ea_file()
+        cls.load_xyz_file()
 
-    def load_arrays(self):
-        self.load_nm_file()
-        self.load_vu_file()
-        self.load_ea_file()
-        self.load_xyz_file()
-
-    def load_nm_file(self):
-        nm_file = Path('data_test/ERP_nm.pickle')
-        if nm_file.exists():
-            self.nm_test = pickle.load(nm_file.open('rb'))
+    @classmethod
+    def load_nm_file(cls):
+        if cls.nm_file.exists():
+            cls.nm_test = pickle.loads(cls.nm_file.read_bytes())
         else:
             shape = (200, 300)
-            self.nm_test = np.mgrid[range(shape[0]), range(shape[1])]
-            with open(nm_file, 'wb') as f:
-                pickle.dump(self.nm_test, f)
+            cls.nm_test = np.array(np.mgrid[0:shape[0], 0:shape[1]])
+            cls.nm_file.write_bytes(pickle.dumps(cls.nm_test))
 
-    def load_vu_file(self):
-        vu_file = Path('data_test/ERP_vu.pickle')
-        if vu_file.exists():
-            self.vu_test = pickle.load(vu_file.open('rb'))
+    @classmethod
+    def load_vu_file(cls):
+        if cls.vu_file.exists():
+            cls.vu_test = pickle.loads(cls.vu_file.read_bytes())
         else:
-            self.vu_test = erp2vu(self.nm_test)
-            with open(vu_file, 'wb') as f:
-                pickle.dump(self.vu_test, f)
+            cls.vu_test = erp_erp2vu(cls.nm_test)
+            cls.vu_file.write_bytes(pickle.dumps(cls.vu_test))
 
     def load_ea_file(self):
         ea_file = Path('data_test/ERP_ae.pickle')
@@ -131,54 +232,3 @@ class TestERP:
             msg += 'Error in ea2cmp_face()'
 
         assert msg == '', msg
-
-
-def compose(proj: ERP, frame_img: Image):
-    tiles = proj.get_vptiles()
-    frame_array = np.asarray(frame_img)
-
-    height, width = frame_array.shape
-    viewport_array = proj.get_viewport(frame_array)
-    vp_image = Image.fromarray(viewport_array)
-    width_vp = int(np.round(height * vp_image.width / vp_image.height))
-    vp_image_resized = vp_image.resize((width_vp, height))
-
-    cover_red = Image.new("RGB", (width, height), (255, 0, 0))
-    cover_green = Image.new("RGB", (width, height), (0, 255, 0))
-    cover_gray = Image.new("RGB", (width, height), (200, 200, 200))
-    cover_blue = Image.new("RGB", (width, height), (0, 0, 255))
-
-    # Get masks
-    mask_all_tiles_borders = Image.fromarray(proj.draw_all_tiles_borders())
-    mask_vp_tiles = Image.fromarray(proj.draw_vp_tiles())
-    mask_vp = Image.fromarray(proj.draw_vp_mask(lum=200))
-    mask_vp_borders = Image.fromarray(proj.draw_vp_borders())
-
-    # Composite mask with projection
-    frame_img = Image.composite(cover_red, frame_img, mask=mask_all_tiles_borders)
-    frame_img = Image.composite(cover_green, frame_img, mask=mask_vp_tiles)
-    frame_img = Image.composite(cover_gray, frame_img, mask=mask_vp)
-    frame_img = Image.composite(cover_blue, frame_img, mask=mask_vp_borders)
-
-    new_im = Image.new('RGB', (width + width_vp + 2, height), (255, 255, 255))
-    new_im.paste(frame_img, (0, 0))
-    new_im.paste(vp_image_resized, (width + 2, 0))
-    new_im.show()
-
-    print(f'The viewport touch the tiles {tiles}.')
-
-
-def test_erp():
-    # erp '144x72', '288x144','432x216','576x288'
-    # cmp '144x96', '288x192','432x288','576x384'
-    yaw_pitch_roll = np.deg2rad((70, 0, 0))
-    height, width = 288, 576
-
-    ########################################
-    # Open Image
-    frame_img: Union[Image, list] = Image.open('images/erp1.jpg')
-    frame_img = frame_img.resize((width, height))
-
-    erp = ERP(tiling='6x4', proj_res=f'{width}x{height}', fov='100x90')
-    erp.yaw_pitch_roll = yaw_pitch_roll
-    compose(erp, frame_img)
