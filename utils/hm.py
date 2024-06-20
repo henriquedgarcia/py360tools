@@ -20,11 +20,11 @@ def position2displacement(df_positions):
     """
 
     # convert to numpy
-    positions = np.array(df_positions['yaw', 'pitch'])
-    pos = ea2xyz(ea=positions.T[:2]).T
+    positions = np.array(df_positions[['yaw', 'pitch']])
+    pos = ea2xyz(ea=positions.T).T
 
     # Calculate angle displacement = arc_cos(dot(v1, v2))
     dot_product = [np.sum(pos[i] * pos[i + 1] / (norm(pos[i]) * norm(pos[i + 1]))) for i in range(len(pos) - 1)]
     inst_angle = np.arccos(dot_product)
 
-    return pd.DataFrame(inst_angle, columns=['displacement (in rads)'])
+    return pd.DataFrame(inst_angle, columns=['displacement'])
