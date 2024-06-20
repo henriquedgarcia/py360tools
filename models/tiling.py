@@ -18,15 +18,19 @@ class Tiling:
 
         self.shape = splitx(tiling)[::-1]
         self.ntiles = self.shape[0] * self.shape[1]
-        tile_shape = (int(proj_shape[0] / self.shape[0]),
-                      int(proj_shape[1] / self.shape[1]))
-        self.tiles = [Tile(idx, self, tile_shape) for idx in range(self.ntiles)]
+        self.tile_shape = (int(proj_shape[0] / self.shape[0]),
+                           int(proj_shape[1] / self.shape[1]))
+        self.tiles = [Tile(idx, self, self.tile_shape) for idx in range(self.ntiles)]
 
     def __str__(self):
         return self.tiling
 
     def __repr__(self):
         return f'Tiling({self})@{self.proj_shape}'
+
+    def __eq__(self, other):
+        return (self.tiling == other.tiling and
+                tuple(self.proj_shape) == tuple(other.proj_shape))
 
 
 class Tile:
@@ -50,14 +54,19 @@ class Tile:
         self.image = image
 
         self.tiling_position = unflatten_index(tile_id, tiling.shape)
-        self.pixel_position = (self.tiling_position[0] * self.shape[1],
-                               self.tiling_position[1] * self.shape[0])
+        self.pixel_position = np.array([self.tiling_position[1] * self.shape[0],
+                                        self.tiling_position[0] * self.shape[1]])
 
     def __str__(self):
         return f'tile{self.tile_id}'
 
     def __repr__(self):
-        return f'tile{self.tile_id}@{self.tiling} ({self.tiling_position[1]}px X {self.tiling_position[0]}px)'
+        return f'tile{self.tile_id}@{self.tiling} ({self.pixel_position[1]}px X {self.pixel_position[0]}px)'
 
     def __int__(self):
         return self.tile_id
+
+    def __eq__(self, other):
+        return (self.tile_id == other.tile_id and
+                self.tiling == other.tiling and
+                tuple(self.shape) == tuple(other.shape))
