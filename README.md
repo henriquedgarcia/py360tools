@@ -27,7 +27,7 @@ class lib.projectionbase.ProjBase(*, proj_res, fov, tiling = '1x1', vp_shape: = 
 import numpy as np
 from PIL import Image
 
-from projections.cmp import CMP
+from models.cmp import CMP
 
 # Create a instance of projection
 cmp = CMP(proj_res=f'600x400', tiling='6x4', fov='110x90')
@@ -47,7 +47,7 @@ print(viewport_tiles)  # ['3', '4', '5', '9', '10', '11', '12', '17']
 import numpy as np
 from PIL import Image
 
-from projections.cmp import CMP
+from models.cmp import CMP
 
 # Open a projection frame
 frame_img = Image.open('images/cmp1.png')
@@ -80,7 +80,7 @@ Image.fromarray(frame_array).show()
 import numpy as np
 from PIL import Image
 
-from projections.cmp import CMP
+from models.cmp import CMP
 
 # Open a projection frame
 frame_img = Image.open('images/cmp1.png')
