@@ -4,10 +4,10 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
-
-from projections.cmp import (CMP)
-from utils.transform import cmp_cmp2nmface, cmp_nmface2vuface, cmp_vuface2xyz_face, cmp_xyz2vuface, cmp_vuface2nmface, \
-    cmp_nmface2cmp_face, cmp_ea2cmp_face, cmp_cmp2ea_face
+from models import CMP, Viewport
+from helper.draw import draw
+from utils.transform_cmp import cmp_cmp2nmface, cmp_nmface2vuface, cmp_vuface2xyz_face, cmp_xyz2vuface, \
+    cmp_vuface2nmface, cmp_nmface2cmp_face, cmp_ea2cmp_face, cmp_cmp2ea_face
 from utils.util import test, show
 
 show = show
@@ -15,8 +15,10 @@ __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
 
 
-class TestCmp(unittest.TestCase):
+class TestDrawMethods(unittest.TestCase):
     projection: CMP
+    viewport: Viewport
+    frame_array: np.ndarray
 
     @classmethod
     def setUpClass(cls):
@@ -25,7 +27,9 @@ class TestCmp(unittest.TestCase):
         height, width = 384, 576
 
         cls.projection = CMP(tiling='6x4', proj_res=f'{width}x{height}', fov='110x90')
-        cls.projection.yaw_pitch_roll = np.deg2rad((70, 0, 0))
+        cls.viewport = Viewport(vp_shape=np.array([500, 600]),
+                                fov=np.array([110, 90]))
+        cls.viewport.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
         # Open Image
         frame_img: Image = Image.open('images/cmp1.png')
@@ -35,7 +39,7 @@ class TestCmp(unittest.TestCase):
     draw_all_tiles_borders_test_file = Path(f'{__PATH__}/assets/draw_all_tiles_borders_test_file.pickle')
 
     def test_draw_all_tiles_borders(self):
-        draw_all_tiles_borders = self.projection.draw_all_tiles_borders()
+        draw_all_tiles_borders = draw.draw_all_tiles_borders()
 
         try:
             draw_all_tiles_borders_test = pickle.loads(self.draw_all_tiles_borders_test_file.read_bytes())
@@ -48,7 +52,7 @@ class TestCmp(unittest.TestCase):
     draw_vp_borders_test_file = Path(f'{__PATH__}/assets/draw_vp_borders_test_file.pickle')
 
     def test_draw_vp_borders(self):
-        draw_vp_borders = self.projection.draw_vp_borders()
+        draw_vp_borders = draw.draw_vp_borders()
 
         try:
             draw_vp_borders_test = pickle.loads(self.draw_vp_borders_test_file.read_bytes())
@@ -61,7 +65,7 @@ class TestCmp(unittest.TestCase):
     draw_vp_mask_test_file = Path(f'{__PATH__}/assets/draw_vp_mask_test_file.pickle')
 
     def test_draw_vp_mask(self):
-        draw_vp_mask = self.projection.draw_vp_mask()
+        draw_vp_mask = draw.draw_vp_mask()
 
         try:
             draw_vp_mask_test = pickle.loads(self.draw_vp_mask_test_file.read_bytes())
@@ -74,7 +78,7 @@ class TestCmp(unittest.TestCase):
     draw_vp_tiles_test_file = Path(f'{__PATH__}/assets/draw_vp_tiles_test_file.pickle')
 
     def test_draw_vp_tiles(self):
-        draw_vp_tiles = self.projection.draw_vp_tiles()
+        draw_vp_tiles = draw.draw_vp_tiles()
 
         try:
             draw_vp_tiles_test = pickle.loads(self.draw_vp_tiles_test_file.read_bytes())
@@ -87,7 +91,7 @@ class TestCmp(unittest.TestCase):
     get_vptiles_test_file = Path(f'{__PATH__}/assets/get_vptiles_test_file.pickle')
 
     def test_get_vptiles(self):
-        get_vptiles = self.projection.get_vptiles()
+        get_vptiles = self.projection.get_vptiles(self.viewport)
         get_vptiles = np.array(get_vptiles)
 
         try:
@@ -101,7 +105,8 @@ class TestCmp(unittest.TestCase):
     get_viewport_image_test_file = Path(f'{__PATH__}/assets/get_viewport_image_test_file.pickle')
 
     def test_get_viewport_image(self):
-        get_viewport_image = self.projection.get_viewport_image(self.frame_array)
+        get_viewport_image = self.projection.extract_viewport(self.viewport,
+                                                              self.frame_array)
 
         try:
             get_viewport_image_test = pickle.loads(self.get_viewport_image_test_file.read_bytes())
@@ -112,7 +117,7 @@ class TestCmp(unittest.TestCase):
         self.assertTrue(np.alltrue(get_viewport_image_test == get_viewport_image))
 
 
-class TestCMP:
+class TestCmpOld:
     nm_test: np.ndarray
     nmface_test: np.ndarray
     vuface_test: np.ndarray
