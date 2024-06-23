@@ -76,9 +76,10 @@ class ViewportBase(ABC):
         return self._yaw_pitch_roll
 
     @yaw_pitch_roll.setter
-    def yaw_pitch_roll(self, value):
-        self._yaw_pitch_roll = value
-        self._clear()
+    def yaw_pitch_roll(self, value: np.ndarray):
+        if not np.equal(self._yaw_pitch_roll, value):
+            self._yaw_pitch_roll = value
+            self._clear()
 
     def _clear(self):
         self._mat_rot = None
