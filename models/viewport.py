@@ -1,25 +1,75 @@
-from typing import Union, Callable, Optional
+from abc import ABC, abstractmethod
+from typing import Optional
 
-import cv2
 import numpy as np
 
-from .util import get_borders_value
-from .transform import rot_matrix
+from utils.transform import rot_matrix
+from utils.util import get_borders_value
 
 
-class ViewportProps:
+class ViewportBase(ABC):
     base_normals: np.ndarray
-    fov: np.ndarray
-    vp_xyz_base: np.ndarray
     vp_shape: np.ndarray
     base_vp_xyz: np.ndarray
+    _vp_borders_xyz: np.ndarray
+
+    def get_vp_borders_xyz(self, thickness: int = 1) -> np.ndarray:
+        """
+
+        :param thickness: in pixels
+        :return: np.ndarray (shape == (1,HxW,3)
+        """
+
+    @abstractmethod
+    def _make_normals_base(self):
+        """
+        Com eixo entrando no observador, rotação horário é negativo e anti-horária
+        é positivo. Todos os ângulos são radianos.
+
+        O eixo x aponta para a direita
+        O eixo y aponta para baixo
+        O eixo z aponta para a frente
+
+        Deslocamento para a direita e para cima é positivo.
+
+        O viewport é a região da esfera que faz intersecção com 4 planos que passam pelo
+          centro (4 grandes círculos): cima, direita, baixo e esquerda.
+        Os planos são definidos tal que suas normais (N) parte do centro e apontam na mesma direção a
+          região do viewport. Ex: O plano de cima aponta para cima, etc.
+        Todos os píxels que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
+        O plano de cima possui inclinação de FOV_Y / 2.
+          Sua normal é x=0,y=sin(FOV_Y/2 + pi/2), z=cos(FOV_Y/2 + pi/2)
+        O plano de baixo possui inclinação de -FOV_Y / 2.
+          Sua normal é x=0,y=sin(-FOV_Y/2 - pi/2), z=cos(-FOV_Y/2 - pi/2)
+        O plano da direita possui inclinação de FOV_X / 2. (para direita)
+          Sua normal é x=sin(FOV_X/2 + pi/2),y=0, z=cos(FOV_X/2 + pi/2)
+        O plano da esquerda possui inclinação de -FOV_X/2. (para direita)
+          Sua normal é x=sin(-FOV_X/2 - pi/2),y=0, z=cos(-FOV_X/2 - pi/2)
+
+        :return:
+        :rtype: None
+        """
+        pass
+
+    @abstractmethod
+    def _make_vp_xyz_base(self):
+        """
+        The VP projection is based in rectilinear projection.
+
+        In the sphere domain, in te cartesian system, the center of a plain touch the sphere
+        on the point (x=0,y=0,z=1).
+        The plain sizes are based on the tangent of fov.
+        The resolution (number of samples) of viewport is defined by the constructor.
+        The proj_coord_xyz.shape is (:,H,W) == (x, y z)
+        :return:
+        :rtype: None
+        """
+        pass
 
     _yaw_pitch_roll: np.ndarray
-
     _mat_rot: Optional[np.ndarray] = None
     _normals_rotated: Optional[np.ndarray] = None
     _vp_rotated_xyz: Optional[np.ndarray] = None
-    _vp_img: Optional[np.ndarray] = None
 
     @property
     def yaw_pitch_roll(self):
@@ -28,10 +78,12 @@ class ViewportProps:
     @yaw_pitch_roll.setter
     def yaw_pitch_roll(self, value):
         self._yaw_pitch_roll = value
+        self._clear()
+
+    def _clear(self):
         self._mat_rot = None
         self._normals_rotated = None
         self._vp_rotated_xyz = None
-        self._vp_img = None
 
     @property
     def mat_rot(self) -> np.ndarray:
@@ -58,15 +110,17 @@ class ViewportProps:
         return self._vp_rotated_xyz
 
 
-class Viewport(ViewportProps):
-    def __init__(self, vp_shape: Union[np.ndarray, tuple], fov: np.ndarray):
+class Viewport(ViewportBase):
+    def __init__(self, vp_shape, fov):
         """
         Viewport Class used to extract view pixels in projections.
         The vp is an image as numpy array with shape (H, M, 3).
         That can be RGB (matplotlib, pillow, etc.) or BGR (opencv).
 
-        :param frame vp_shape: (600, 800) for 800x600px
-        :param fov: in rad. Ex: "np.array((pi/2, pi/2))" for (90°x90°)
+        :param vp_shape: (600, 800) for 800x600px
+        :type vp_shape: np.ndarray
+        :param fov: in rad. Ex: "np.array((pi/2, pi*2/3))" for (120°x90°)
+        :type fov: np.ndarray
         """
         self.fov = fov
         self.vp_shape = vp_shape
@@ -74,33 +128,7 @@ class Viewport(ViewportProps):
         self._make_vp_xyz_base()
         self.yaw_pitch_roll = np.array([0, 0, 0])
 
-    def _make_normals_base(self) -> None:
-        """
-        Com eixo entrando no observador, rotação horário é negativo e anti-horária
-        é positivo. Todos os ângulos são radianos.
-
-        O eixo x aponta para a direita
-        O eixo y aponta para baixo
-        O eixo z aponta para a frente
-
-        Deslocamento para a direita e para cima é positivo.
-
-        O viewport é a região da esfera que faz intersecção com 4 planos que passam pelo
-          centro (4 grandes círculos): cima, direita, baixo e esquerda.
-        Os planos são definidos tal que suas normais (N) parte do centro e apontam na mesma direção a
-          região do viewport. Ex: O plano de cima aponta para cima, etc.
-        Todos os píxels que estiverem abaixo do plano {N(x,y,z) dot P(x,y,z) <= 0}
-        O plano de cima possui inclinação de FOV_Y / 2.
-          Sua normal é x=0,y=sin(FOV_Y/2 + pi/2), z=cos(FOV_Y/2 + pi/2)
-        O plano de baixo possui inclinação de -FOV_Y / 2.
-          Sua normal é x=0,y=sin(-FOV_Y/2 - pi/2), z=cos(-FOV_Y/2 - pi/2)
-        O plano da direita possui inclinação de FOV_X / 2. (para direita)
-          Sua normal é x=sin(FOV_X/2 + pi/2),y=0, z=cos(FOV_X/2 + pi/2)
-        O plano da esquerda possui inclinação de -FOV_X/2. (para direita)
-          Sua normal é x=sin(-FOV_X/2 - pi/2),y=0, z=cos(-FOV_X/2 - pi/2)
-
-        :return:
-        """
+    def _make_normals_base(self):
         fov_2 = self.fov / (2, 2)
         cos_fov = np.cos(fov_2)
         sin_fov = np.sin(fov_2)
@@ -110,17 +138,8 @@ class Viewport(ViewportProps):
                                       [-cos_fov[1], 0, -sin_fov[1]],  # left
                                       [cos_fov[1], 0, -sin_fov[1]]]).T  # right
 
-    def _make_vp_xyz_base(self) -> None:
-        """
-        The VP projection is based in rectilinear projection.
+    def _make_vp_xyz_base(self):
 
-        In the sphere domain, in te cartesian system, the center of a plain touch the sphere
-        on the point (x=0,y=0,z=1).
-        The plain sizes are based on the tangent of fov.
-        The resolution (number of samples) of viewport is defined by the constructor.
-        The proj_coord_xyz.shape is (3,H,W). The dim 0 are x, y z coordinates.
-        :return:
-        """
         tan_fov_2 = np.tan(self.fov / 2)
         y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], self.vp_shape[0], endpoint=True)
         x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], self.vp_shape[1], endpoint=False)
@@ -130,7 +149,7 @@ class Viewport(ViewportProps):
         vp_coord_xyz_ = np.array([vp_coord_x, vp_coord_y, vp_coord_z])
 
         r = np.sqrt(np.sum(vp_coord_xyz_ ** 2, axis=0, keepdims=True))
-        # np.power
+
         self.base_vp_xyz = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
 
     def is_viewport(self, x_y_z: np.ndarray) -> bool:
@@ -148,28 +167,6 @@ class Viewport(ViewportProps):
         belong = np.all(inner_prod <= 0, axis=0)
         is_vp = np.any(belong)
         return is_vp
-
-    def get_vp(self, frame: np.ndarray, xyz2nm: Callable) -> np.ndarray:
-        """
-
-        :param frame: The projection image. (N,M,C)
-        :param xyz2nm: A function from 3D to projection.
-        :return: The viewport image (RGB)
-        """
-        if self._vp_img is not None:
-            return self._vp_img
-
-        nm_coord = xyz2nm(self.vp_xyz_rotated, frame.shape[:2])
-        nm_coord = nm_coord.transpose((1, 2, 0))
-        self._vp_img = cv2.remap(frame,
-                                 map1=nm_coord[..., 1:2].astype(np.float32),
-                                 map2=nm_coord[..., 0:1].astype(np.float32),
-                                 interpolation=cv2.INTER_LINEAR,
-                                 borderMode=cv2.BORDER_WRAP)
-        # show1(self._out)
-        return self._vp_img
-
-    _vp_borders_xyz: np.ndarray
 
     def get_vp_borders_xyz(self, thickness: int = 1) -> np.ndarray:
         """
