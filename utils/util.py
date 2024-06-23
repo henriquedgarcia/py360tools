@@ -160,3 +160,47 @@ def compose(img: np.ndarray,
     mask_opacity = np.array(mask_opacity)
     img[mask > 0] = (img[mask > 0] * (1 - mask_opacity) + color * mask_opacity).astype('uint8')
     return img
+
+
+def draw_scatter3d(xyz, vuface):
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+
+    ax = fig.add_subplot(projection='3d')
+
+    ax.scatter(0, 0, 0, marker='o', color='red')
+    ax.scatter(1, 1, 1, marker='o', color='red')
+    ax.scatter(1, 1, -1, marker='o', color='red')
+    ax.scatter(1, -1, 1, marker='o', color='red')
+    ax.scatter(1, -1, -1, marker='o', color='red')
+    ax.scatter(-1, 1, 1, marker='o', color='red')
+    ax.scatter(-1, 1, -1, marker='o', color='red')
+    ax.scatter(-1, -1, 1, marker='o', color='red')
+    ax.scatter(-1, -1, -1, marker='o', color='red')
+    [ax.scatter(x, y, z, marker='o', color='red')
+     for x, y, z in zip(xyz[0, 0:4140:100],
+                        xyz[1, 0:4140:100],
+                        xyz[2, 0:4140:100])]
+
+    face0 = vuface[2] == 0
+    face1 = vuface[2] == 1
+    face2 = vuface[2] == 2
+    face3 = vuface[2] == 3
+    face4 = vuface[2] == 4
+    face5 = vuface[2] == 5
+    [ax.scatter(-1, v, u, marker='o', color='blue')
+     for v, u in zip(vuface[0, face0][::25], vuface[1, face0][::25])]
+    [ax.scatter(u, v, 1, marker='o', color='blue')
+     for v, u in zip(vuface[0, face1][::25], vuface[1, face1][::25])]
+    [ax.scatter(1, v, -u, marker='o', color='blue')
+     for v, u in zip(vuface[0, face2][::25], vuface[1, face2][::25])]
+    [ax.scatter(-u, 1, v, marker='o', color='blue')
+     for v, u in zip(vuface[0, face3][::25], vuface[1, face3][::25])]
+    [ax.scatter(-u, v, -1, marker='o', color='blue')
+     for v, u in zip(vuface[0, face4][::25], vuface[1, face4][::25])]
+    [ax.scatter(-u, -1, 1, marker='o', color='blue')
+     for v, u in zip(vuface[0, face5][::25], vuface[1, face5][::25])]
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    plt.show()
