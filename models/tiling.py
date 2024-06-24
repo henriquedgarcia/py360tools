@@ -1,6 +1,6 @@
 import numpy as np
 
-from models.projectionbase import ProjBase
+from models.projectionbase import ProjectionBase
 from utils.util import unflatten_index, splitx
 
 
@@ -11,7 +11,7 @@ class Tiling:
         :param tiling: "12x8"
         :type tiling: str
         :param projection:
-        :type projection: ProjBase
+        :type projection: ProjectionBase
         """
         self.tiling = tiling
         self.projection = projection
@@ -19,7 +19,7 @@ class Tiling:
         self.shape = np.array(splitx(tiling)[::-1])
         self.ntiles = self.shape[0] * self.shape[1]
 
-        self.tiles: list[Tile] = [Tile(tile_id, self) for tile_id in range(self.ntiles)]
+        self.tile_list: list[Tile] = [Tile(tile_id, self) for tile_id in range(self.ntiles)]
 
     def __str__(self):
         return self.tiling
