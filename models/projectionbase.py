@@ -11,51 +11,29 @@ from utils.util import splitx
 
 class ProjectionInterface(ABC):
     @abstractmethod
-    def nm2xyz(self, nm: np.ndarray, proj_shape: np.ndarray) -> np.ndarray:
+    def nm2xyz(self, nm) -> np.ndarray:
         """
         Projection specific.
 
         :param nm: shape==(2,...)
-        :param proj_shape:
+        :type nm: np.ndarray
         :return:
         """
         pass
 
     @abstractmethod
-    def xyz2nm(self, xyz: np.ndarray, proj_shape: Union[np.ndarray, tuple]) -> np.ndarray:
+    def xyz2nm(self, xyz: np.ndarray) -> np.ndarray:
         """
         Projection specific.
 
         :param xyz: shape==(2,...)
-        :param proj_shape:
+        :type xyz: np.ndarray
         :return:
         """
         pass
 
-    @abstractmethod
-    def extract_viewport(self, viewport, frame_img, yaw_pitch_roll):
-        """
 
-        :param viewport:
-        :param frame_img: A full frame of the projection
-        :type frame_img: np.ndarray
-        :type yaw_pitch_roll: np.ndarray | tuple
-        :return:
-        """
-        pass
-
-    @abstractmethod
-    def get_vptiles(self, viewport):
-        """
-
-        :param viewport:
-        :type viewport: Viewport
-        :return: Return a list with all the tiles used in the viewport.
-        :rtype: list[Tile]
-        """
-
-
-class ProjBase(ProjectionInterface, ABC):
+class ProjectionBase(ProjectionInterface, ABC):
     def __init__(self, *, proj_res, tiling='1x1'):
         """
 
@@ -64,29 +42,26 @@ class ProjBase(ProjectionInterface, ABC):
         :param tiling: A string representing the tiling. e.g. '1x1' or '3x2'
         :type tiling: str
         """
-        self.proj_res = proj_res
         self.name = self.__class__.__name__
+
+        self.proj_res = proj_res
+        self.tiling = Tiling(tiling, self)
 
         # About projection
         self.shape = np.array(splitx(self.proj_res)[::-1], dtype=int)
         self.coord_nm = np.array(np.mgrid[0:self.shape[0], 0:self.shape[1]])
         self.coord_xyz = self.nm2xyz(self.coord_nm, self.shape)
 
-        self.tiling = Tiling(tiling, self)
-
-    def extract_viewport(self, viewport, frame_img, yaw_pitch_roll=None):
+    def extract_viewport(self, viewport, frame_img):
         """
 
         :param viewport:
         :type viewport: Viewport
         :param frame_img:
         :type frame_img: np.ndarray
-        :param yaw_pitch_roll:
-        :type yaw_pitch_roll: np.ndarray | tuple
         :return:
         :type:
         """
-        viewport.yaw_pitch_roll = yaw_pitch_roll
 
         nm_coord = self.xyz2nm(viewport.vp_xyz_rotated, self.shape)
         nm_coord = nm_coord.transpose((1, 2, 0))
@@ -99,11 +74,22 @@ class ProjBase(ProjectionInterface, ABC):
         return vp_img
 
     def get_vptiles(self, viewport):
-        if str(self.tiling) == '1x1': return [self.tiling.tiles[0]]
+        """
+
+        :param viewport:
+        :type viewport: Viewport
+        :return: Return a list with all the tiles used in the viewport.
+        :rtype: list[Tile]
+        """
+        if str(self.tiling) == '1x1': return [self.tiling.tile_list[0]]
 
         vptiles = []
-        for tile in self.tiling.tiles:
+        for tile in self.tiling.tile_list:
             borders_xyz = self.nm2xyz(tile.borders, self.shape)
             if viewport.is_viewport(borders_xyz):
                 vptiles.append(tile)
         return vptiles
+
+    @property
+    def tile_list(self):
+        return self.tiling.tile_list
