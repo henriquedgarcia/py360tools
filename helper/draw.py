@@ -31,7 +31,7 @@ class DrawHelper:
         :return:
         """
         canvas = np.zeros(projection.projection, dtype='uint8')
-        for tile in projection.tiling.tiles:
+        for tile in projection.tiling.tile_list:
             canvas = canvas + cls.draw_tile_border(projection=projection, idx=int(tile), lum=lum)
         return canvas
 
@@ -57,7 +57,7 @@ class DrawHelper:
         """
         canvas = np.zeros(projection.projection, dtype='uint8')
 
-        inner_prod = np.tensordot(projection.viewport.rotated_normals.T, projection.coord_xyz, axes=1)
+        inner_prod = np.tensordot(projection.viewport.normals_rotated.T, projection.coord_xyz, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
         canvas[belong] = lum
 
