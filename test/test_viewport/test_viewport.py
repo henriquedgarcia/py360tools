@@ -18,7 +18,7 @@ class TestViewport(unittest.TestCase):
                                 fov=np.ndarray([110, 90]))
 
     def test_make_normals_base(self):
-        self.viewport.base_normals == self.viewport.base_normals
+        self.viewport.normals_default == self.viewport.normals_default
         pass
 
     def test_make_vp_xyz_base(self):
