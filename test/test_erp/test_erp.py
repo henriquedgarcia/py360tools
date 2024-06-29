@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from models.erp import ERP
-from utils.transform_erp import erp_erp2vu
+from models.erp import ERP, erp2vu, vu2ea, vu2erp
+from utils.transform import ea2xyz
 from utils.util import test, show
 
 show = show
@@ -140,7 +140,7 @@ class TestErpOld(unittest.TestCase):
         if cls.vu_file.exists():
             cls.vu_test = pickle.loads(cls.vu_file.read_bytes())
         else:
-            cls.vu_test = erp_erp2vu(cls.nm_test)
+            cls.vu_test = erp2vu(cls.nm_test)
             cls.vu_file.write_bytes(pickle.dumps(cls.vu_test))
 
     def load_ea_file(self):
@@ -163,19 +163,19 @@ class TestErpOld(unittest.TestCase):
                 pickle.dump(self.xyz_test, f)
 
     def test(self):
-        test(self.teste_cmp2mn_face)
+        test(self.teste_erp2vu)
         test(self.teste_nmface2vuface)
         test(self.teste_vuface2xyz)
         test(self.teste_cmp2ea)
 
-    def teste_cmp2mn_face(self):
-        nmface = cmp2nmface(self.nm_test)
-        nm, face = nmface2cmp_face(nmface)
+    def teste_erp2vu(self):
+        vu = erp2vu(self.nm_test)
+        nm = vu2erp(vu)
 
         msg = ''
         if not np.array_equal(self.nm_test, nm):
             msg += 'Error in reversion'
-        if not np.array_equal(nmface, self.nmface_test):
+        if not np.array_equal(vu, self.nmface_test):
             msg += 'Error in nmface2cmp_face()'
 
         nm, face = nmface2cmp_face(self.nmface_test)
