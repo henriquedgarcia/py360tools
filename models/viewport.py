@@ -7,8 +7,8 @@ from utils.transform import rot_matrix
 
 
 class NormalsInterface(ABC):
-    @abstractmethod
     @property
+    @abstractmethod
     def normals_default(self):
         """
         Com eixo entrando no observador, rotação horário é negativo e anti-horária
@@ -39,15 +39,15 @@ class NormalsInterface(ABC):
         """
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def normals_rotated(self) -> np.ndarray:
         pass
 
 
 class VpCoordsInterface(ABC):
-    @abstractmethod
     @property
+    @abstractmethod
     def vp_xyz_default(self):
         """
         The VP projection is based in rectilinear projection.
@@ -62,8 +62,8 @@ class VpCoordsInterface(ABC):
         """
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def vp_xyz_rotated(self):
         """
 
@@ -90,8 +90,8 @@ class ViewportBase(NormalsInterface, VpCoordsInterface, ABC):
         """
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def mat_rot(self):
         """
 
@@ -100,8 +100,8 @@ class ViewportBase(NormalsInterface, VpCoordsInterface, ABC):
         """
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def yaw_pitch_roll(self):
         """
 
@@ -110,8 +110,8 @@ class ViewportBase(NormalsInterface, VpCoordsInterface, ABC):
         """
         pass
 
-    @abstractmethod
     @yaw_pitch_roll.setter
+    @abstractmethod
     def yaw_pitch_roll(self, value):
         """
 
