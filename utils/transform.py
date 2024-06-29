@@ -104,5 +104,3 @@ def rot_matrix(yaw_pitch_roll):
     mat_z = np.array([[cos_rot[2], -sin_rot[2], 0], [sin_rot[2], cos_rot[2], 0], [0, 0, 1]])
 
     return mat_y @ mat_x @ mat_z
-
-
