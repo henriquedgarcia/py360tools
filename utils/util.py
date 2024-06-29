@@ -204,3 +204,27 @@ def draw_scatter3d(xyz, vuface):
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
     plt.show()
+
+
+def get_tile_borders(tile_id, tiling_shape, tile_shape):
+    """
+
+    :param tile_id: The 1D index on the tiling pattern. (C-style order)
+    :type tile_id: int
+    :return:
+    :rtype: np.ndarray
+    """
+    tiling_x, tiling_y = unflatten_index(tile_id, tiling_shape)
+
+    x1 = tiling_x * tile_shape[1]
+    x2 = (tiling_x + 1) * tile_shape[1]
+    y1 = tiling_y * tile_shape[0]
+    y2 = (tiling_y + 1) * tile_shape[0]
+
+    top_border = np.mgrid[y1:y1 + 1, x1:x2]
+    bottom_border = np.mgrid[y2 - 1:y2, x1:x2]
+    left_border = np.mgrid[y1 + 1:y2 - 1, x1:x1 + 1]
+    right_border = np.mgrid[y1 + 1:y2 - 1, x2 - 1:x2]
+
+    borders = np.c_[top_border, bottom_border, left_border, right_border]
+    return borders
