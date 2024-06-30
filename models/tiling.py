@@ -48,7 +48,7 @@ class Tile:
         :param image: array
         """
         self.tile_id = int(tile_id)
-        self.tiling = int(tile_id)
+        self.tiling = tiling
 
     def __str__(self):
         return f'tile{self.tile_id}'
