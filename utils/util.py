@@ -1,3 +1,6 @@
+from typing import Callable
+import pickle
+from pathlib import Path
 from time import time
 from typing import Union
 
@@ -211,6 +214,10 @@ def get_tile_borders(tile_id, tiling_shape, tile_shape):
 
     :param tile_id: The 1D index on the tiling pattern. (C-style order)
     :type tile_id: int
+    :param tiling_shape:
+    :type tiling_shape: np.ndarray
+    :param tile_shape:
+    :type tile_shape: np.ndarray
     :return:
     :rtype: np.ndarray
     """
@@ -221,10 +228,29 @@ def get_tile_borders(tile_id, tiling_shape, tile_shape):
     y1 = tiling_y * tile_shape[0]
     y2 = (tiling_y + 1) * tile_shape[0]
 
-    top_border = np.mgrid[y1:y1 + 1, x1:x2]
-    bottom_border = np.mgrid[y2 - 1:y2, x1:x2]
-    left_border = np.mgrid[y1 + 1:y2 - 1, x1:x1 + 1]
-    right_border = np.mgrid[y1 + 1:y2 - 1, x2 - 1:x2]
+    top_border = np.array(np.mgrid[y1:y1 + 1, x1:x2]).reshape(2, -1)
+    bottom_border = np.array(np.mgrid[y2 - 1:y2, x1:x2]).reshape(2, -1)
+    left_border = np.array(np.mgrid[y1 + 1:y2 - 1, x1:x1 + 1]).reshape(2, -1)
+    right_border = np.array(np.mgrid[y1 + 1:y2 - 1, x2 - 1:x2]).reshape(2, -1)
 
     borders = np.c_[top_border, bottom_border, left_border, right_border]
     return borders
+
+
+def load_test_data(file_name, default_data):
+    """
+    if file_name exists, loads it and returns it.
+    else, run func(**kwargs), save result in file_name as pickle and return
+
+
+    :param file_name: The pickle file name.
+    :type file_name: Path
+    :param default_data:
+    :return:
+    """
+    if file_name.exists():
+        return pickle.loads(file_name.read_bytes())
+
+    file_name.parent.mkdir(parents=True, exist_ok=True)
+    file_name.write_bytes(pickle.dumps(default_data))
+    return default_data
