@@ -40,6 +40,8 @@ class LazyProperty:
 
         try:
             value = getattr(instance, self.attr_name)
+            if value is None:
+                raise AttributeError
         except AttributeError:
             value = self.getter(instance)
             setattr(instance, self.attr_name, value)
@@ -60,8 +62,9 @@ class LazyProperty:
         if instance is None:
             raise AttributeError("The descriptor must be used with class instances.")
 
-        if self.deleter is None:
-            raise AttributeError(f"Deleter not defined for '{self.name}'")
-
-        self.deleter(instance)
-        delattr(instance, '_' + self.name)
+        if self.deleter is not None:
+            self.deleter(instance)
+        try:
+            delattr(instance, '_' + self.name)
+        except AttributeError:
+            pass
