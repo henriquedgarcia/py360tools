@@ -5,8 +5,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from models.erp import ERP, erp2vu, vu2ea, vu2erp
-from utils.transform import ea2xyz
+from models.erp import ERP
+from transform.erp_transform import erp2vu, vu2ea, vu2erp
+from transform.transform import ea2xyz
 from utils.util import test, show
 
 show = show
@@ -86,7 +87,7 @@ class TestErp(unittest.TestCase):
     get_vptiles_test_file = Path(f'{__PATH__}/assets/get_vptiles_test_file.pickle')
 
     def test_get_vptiles(self):
-        get_vptiles = self.projection.get_vptiles()
+        get_vptiles = self.projection.vptiles()
         get_vptiles = np.array(get_vptiles)
 
         try:
