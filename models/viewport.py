@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import numpy as np
 
-from utils.transform import rot_matrix
+from utils.lazyproperty import LazyProperty
+from transform.transform import rotate
 
 
 class NormalsInterface(ABC):
@@ -46,7 +46,7 @@ class NormalsInterface(ABC):
 
 
 class VpCoordsInterface(ABC):
-    @property
+    @LazyProperty
     @abstractmethod
     def vp_xyz_default(self):
         """
@@ -62,7 +62,7 @@ class VpCoordsInterface(ABC):
         """
         pass
 
-    @property
+    @LazyProperty
     @abstractmethod
     def vp_xyz_rotated(self):
         """
@@ -87,16 +87,6 @@ class ViewportBase(NormalsInterface, VpCoordsInterface, ABC):
         :return: A boolean         belong = np.all(inner_product <= 0, axis=0).reshape(self.shape)
         :rtype: bool
 
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def mat_rot(self):
-        """
-
-        :return:
-        :rtype: np.ndarray
         """
         pass
 
@@ -139,74 +129,53 @@ class Viewport(ViewportBase):
         """
         self.fov = fov
         self.vp_shape = vp_shape
-        self.yaw_pitch_roll = np.array([0, 0, 0])
 
     def is_viewport(self, x_y_z):
         inner_prod = np.tensordot(self.normals_rotated.T, x_y_z, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
-        is_vp = np.any(belong)
-        return is_vp
+        return belong
 
-    _default_normals: np.ndarray = None
-
-    @property
+    @LazyProperty
     def normals_default(self):
-        if self._default_normals is None:
-            fov_2 = self.fov / (2, 2)
-            cos_fov = np.cos(fov_2)
-            sin_fov = np.sin(fov_2)
+        """
 
-            self._default_normals = np.array([[0, -cos_fov[0], -sin_fov[0]],  # top
-                                              [0, cos_fov[0], -sin_fov[0]],  # bottom
-                                              [-cos_fov[1], 0, -sin_fov[1]],  # left
-                                              [cos_fov[1], 0, -sin_fov[1]]]).T  # right
+        :return: a (3, 4) array with 4 normal vectors in 3D space. normals_default[:, n] = (x, y, z) for the normal n.
+        """
+        fov_2 = self.fov / (2, 2)
+        cos_fov = np.cos(fov_2)
+        sin_fov = np.sin(fov_2)
+        #                           (        top,      bottom,        left,       right)
+        normals_default = np.array([[          0,           0, -cos_fov[1],  cos_fov[1]],   # x
+                                    [-cos_fov[0],  cos_fov[0],           0,           0],   # y
+                                    [-sin_fov[0], -sin_fov[0], -sin_fov[1], -sin_fov[1]]    # z
+                                    ])
 
-        return self._default_normals
+        return normals_default
 
     @property
     def normals_rotated(self) -> np.ndarray:
-        _normals_rotated = np.tensordot(self.mat_rot, self.normals_default, axes=1)
-        return _normals_rotated
+        return rotate(self.normals_default, self.yaw_pitch_roll)
 
-    # @property
-    # def vp_borders_xyz(self):
-    #     vp_borders_xyz = get_borders_value(array=self.vp_xyz_rotated, thickness=thickness)
-    #     return vp_borders_xyz
-
-    _default_vp_xyz: np.ndarray = None
-
-    @property
+    @LazyProperty
     def vp_xyz_default(self):
-        if self._default_vp_xyz is None:
-            tan_fov_2 = np.tan(self.fov / 2)
-            y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], self.vp_shape[0], endpoint=True)
-            x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], self.vp_shape[1], endpoint=False)
+        tan_fov_2 = np.tan(self.fov / 2)
+        y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], self.vp_shape[0], endpoint=True)
+        x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], self.vp_shape[1], endpoint=False)
 
-            vp_coord_x, vp_coord_y = np.meshgrid(x_coord, y_coord)
-            vp_coord_z = np.ones(self.vp_shape)
-            vp_coord_xyz_ = np.array([vp_coord_x, vp_coord_y, vp_coord_z])
+        vp_coord_x, vp_coord_y = np.meshgrid(x_coord, y_coord)
+        vp_coord_z = np.ones(self.vp_shape)
+        vp_coord_xyz_ = np.array([vp_coord_x, vp_coord_y, vp_coord_z])
 
-            r = np.sqrt(np.sum(vp_coord_xyz_ ** 2, axis=0, keepdims=True))
+        r = np.sqrt(np.sum(vp_coord_xyz_ ** 2, axis=0, keepdims=True))
 
-            self._default_vp_xyz = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
-        return self._default_vp_xyz
+        vp_xyz_default = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
+        return vp_xyz_default
 
     @property
     def vp_xyz_rotated(self) -> np.ndarray:
-        _vp_rotated_xyz = np.tensordot(self.mat_rot, self.vp_xyz_default, axes=1)
-        return _vp_rotated_xyz
+        return rotate(self.vp_xyz_default, self.yaw_pitch_roll)
 
-    _mat_rot: Optional[np.ndarray] = None
-
-    @property
-    def mat_rot(self):
-        if self._mat_rot is not None:
-            return self._mat_rot
-
-        self._mat_rot = rot_matrix(self.yaw_pitch_roll)
-        return self._mat_rot
-
-    _yaw_pitch_roll: np.ndarray
+    _yaw_pitch_roll = np.array([0., 0., 0.])
 
     @property
     def yaw_pitch_roll(self):
@@ -214,6 +183,10 @@ class Viewport(ViewportBase):
 
     @yaw_pitch_roll.setter
     def yaw_pitch_roll(self, value):
-        if not np.equal(self._yaw_pitch_roll, value):
-            self._yaw_pitch_roll = value
-            self._mat_rot = None
+        """
+
+        :param value:
+        :type value: np.ndarray | tuple | list | set
+        :return:
+        """
+        self._yaw_pitch_roll = np.array(value).reshape((3,))
