@@ -35,7 +35,7 @@ class ProjectionInterface(ABC):
         pass
 
 
-class ProjectionBuilder:
+class ProjectionBuilder(ProjectionInterface, ABC):
     def _build_projection(self, proj_res: str):
         self.proj_res = proj_res
         self.shape = np.array(splitx(self.proj_res)[::-1], dtype=int)
@@ -45,7 +45,7 @@ class ProjectionBuilder:
 
     def _build_tile_list(self):
         self.tile_shape = (self.shape / self.tiling.shape).astype(int)
-        self.tile_list = (self._build_tile(tile_id) for tile_id in range(self.tiling.ntiles))
+        self.tile_list = [self._build_tile(tile_id) for tile_id in range(self.tiling.ntiles)]
 
     def _build_tile(self, tile_id):
         tile = Tile(tile_id, str(self.tiling))
@@ -85,12 +85,12 @@ class ProjectionBase(ProjectionBuilder, ProjectionInterface, ABC):
         self._build_tiling(tiling)
         self._build_tile_list()
 
-        if None not in [vp_shape, fov]:
+        if vp_shape is not None and fov is not None:
             self._build_viewport(vp_shape, fov)
 
     @LazyProperty
     def coord_nm(self):
-        return np.array(np.mgrid[0:self.shape[0], 0:self.shape[1]])
+        return np.mgrid[0:self.shape[0], 0:self.shape[1]]
 
     @LazyProperty
     def coord_xyz(self):
@@ -104,11 +104,11 @@ class ProjectionBase(ProjectionBuilder, ProjectionInterface, ABC):
     def yaw_pitch_roll(self, value):
         self.viewport.yaw_pitch_roll = value
 
-    def extract_viewport(self, frame_img):
+    def extract_viewport(self, frame_array):
         """
 
-        :param frame_img:
-        :type frame_img: np.ndarray
+        :param frame_array:
+        :type frame_array: np.ndarray
         :return:
         :type:
         """
@@ -118,15 +118,16 @@ class ProjectionBase(ProjectionBuilder, ProjectionInterface, ABC):
 
         nm_coord = self.xyz2nm(self.viewport.vp_xyz_rotated)
         nm_coord = nm_coord.transpose((1, 2, 0))
-        vp_img = cv2.remap(frame_img,
+        vp_img = cv2.remap(frame_array,
                            map1=nm_coord[..., 1:2].astype(np.float32),
                            map2=nm_coord[..., 0:1].astype(np.float32),
                            interpolation=cv2.INTER_LINEAR,
                            borderMode=cv2.BORDER_WRAP)
-        # show1(vp_img)
+        # show(vp_img)
         return vp_img
 
-    def get_vptiles(self):
+    @property
+    def vptiles(self):
         """
 
         :return: Return a list with all the tiles used in the viewport.
@@ -136,7 +137,7 @@ class ProjectionBase(ProjectionBuilder, ProjectionInterface, ABC):
 
         vptiles = []
         for tile in self.tile_list:
-            if self.viewport.is_viewport(tile.borders_xyz):
+            if np.any(self.viewport.is_viewport(tile.borders_xyz)):
                 vptiles.append(tile)
         return vptiles
 
