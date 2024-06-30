@@ -36,7 +36,7 @@ cmp = CMP(proj_res=f'600x400', tiling='6x4', fov='110x90')
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport tiles
-viewport_tiles = cmp.get_vptiles()
+viewport_tiles = cmp.vptiles()
 
 print(viewport_tiles)  # ['3', '4', '5', '9', '10', '11', '12', '17']
 ```
