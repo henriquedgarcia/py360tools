@@ -3,15 +3,16 @@ from pathlib import Path
 
 import numpy as np
 
-from models import Viewport
-from transform.transform import ea2xyz
-from utils.util import load_test_data
-from utils.util import show
+from lib.helper import show
+from lib.models.viewport import Viewport
+from lib.transform.transform import ea2xyz
+from lib.utils.util import load_test_data
 
 show = show
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
-__ASSETS__ = __PATH__ / 'assets'
+__ASSETS__ = __PATH__ / f'assets/{__FILENAME__.stem}'
+__ASSETS__.mkdir(parents=True, exist_ok=True)
 
 
 class TestViewport(unittest.TestCase):
@@ -42,24 +43,24 @@ class TestViewport(unittest.TestCase):
         self.assertTrue(np.array_equal(is_viewport, is_viewport_test))
 
     def test_make_vp_xyz_base(self):
-        xyz_base_test_file = Path(f'{__ASSETS__}/TestViewport_xyz_base_test_file.pickle')
-        xyz_base = load_test_data(xyz_base_test_file, self.viewport.vp_xyz_default)
-        self.assertTrue(np.array_equal(xyz_base, self.viewport.vp_xyz_default))
+        xyz_default_test_file = Path(f'{__ASSETS__}/TestViewport_xyz_default_test_file.pickle')
+        xyz_default = load_test_data(xyz_default_test_file, self.viewport._xyz_default)
+        self.assertTrue(np.array_equal(xyz_default, self.viewport._xyz_default))
 
     def test_make_vp_xyz_rotated(self):
         vp_xyz_rotated_test_file = Path(f'{__ASSETS__}/TestViewport_vp_xyz_rotated_test_file.pickle')
-        vp_xyz_rotated = load_test_data(vp_xyz_rotated_test_file, self.viewport.vp_xyz_rotated)
-        self.assertTrue(np.array_equal(vp_xyz_rotated, self.viewport.vp_xyz_rotated))
+        vp_xyz_rotated = load_test_data(vp_xyz_rotated_test_file, self.viewport.xyz)
+        self.assertTrue(np.array_equal(vp_xyz_rotated, self.viewport.xyz))
 
     def test_normals_default(self):
         normals_default_test_file = Path(f'{__ASSETS__}/TestViewport_normals_default_test_file.pickle')
-        normals_default = load_test_data(normals_default_test_file, self.viewport.normals_default)
-        self.assertTrue(np.array_equal(self.viewport.normals_default, normals_default))
+        normals_default = load_test_data(normals_default_test_file, self.viewport.normals)
+        self.assertTrue(np.array_equal(self.viewport.normals, normals_default))
 
     def test_normals_rotated(self):
         normals_rotated_test_file = Path(f'{__ASSETS__}/TestViewport_normals_rotated_test_file.pickle')
-        normals_rotated = load_test_data(normals_rotated_test_file, self.viewport.normals_rotated)
-        self.assertTrue(np.array_equal(self.viewport.normals_rotated, normals_rotated))
+        normals_rotated = load_test_data(normals_rotated_test_file, self.viewport.normals)
+        self.assertTrue(np.array_equal(self.viewport.normals, normals_rotated))
 
     # def test_is_viewport(self):
     #     pass

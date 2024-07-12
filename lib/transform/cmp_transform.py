@@ -1,6 +1,6 @@
 import numpy as np
 
-from transform.transform import ea2xyz, xyz2ea
+from lib.transform.transform import ea2xyz, xyz2ea
 
 
 def cmp2nmface(*, nm, proj_shape=None) -> np.ndarray:

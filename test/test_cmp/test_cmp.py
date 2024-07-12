@@ -5,19 +5,19 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from models import CMP
-from utils.util import show, load_test_data
-from transform.cmp_transform import cmp2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface, \
-    nmface2cmp_face
+from lib.helper import show
+from lib.models import CMP
+from lib.utils import load_test_data
 
 show = show
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
-__ASSETS__ = __PATH__ / 'assets'
+__ASSETS__ = __PATH__ / f'assets/{__FILENAME__.stem}'
+__ASSETS__.mkdir(parents=True, exist_ok=True)
 
-xyz_file = Path(f'{__ASSETS__}/TestCmp/xyz.pickle')
-vp_img_file = Path(f'{__ASSETS__}/TestCmp/vp_img.pickle')
-vptiles_file = Path(f'{__ASSETS__}/TestCmp/vptiles.pickle')
+xyz_file = Path(f'{__ASSETS__}/xyz.pickle')
+vp_img_file = Path(f'{__ASSETS__}/vp_img.pickle')
+vptiles_file = Path(f'{__ASSETS__}/vptiles.pickle')
 
 
 class TestCmp(unittest.TestCase):
@@ -32,8 +32,8 @@ class TestCmp(unittest.TestCase):
         height, width = 384, 576
 
         cls.projection = CMP(tiling='6x4', proj_res=f'{width}x{height}',
-                             vp_shape=np.array([360, 440]),
-                             fov=np.array([np.deg2rad(90), np.deg2rad(110)]))
+                             vp_res='440x360',
+                             fov_res='110x90')
         cls.projection.yaw_pitch_roll = np.deg2rad((0, 0, -0))
 
         frame_img: Image = Image.open('images/cmp1.png')
@@ -41,17 +41,17 @@ class TestCmp(unittest.TestCase):
         cls.frame_array = np.array(frame_img)
 
         # Load expected values
-        cls.xyz_test_data = load_test_data(xyz_file, cls.projection.coord_xyz)
+        cls.xyz_test_data = load_test_data(xyz_file, cls.projection.xyz)
         cls.vp_img_test_data = load_test_data(vp_img_file, cls.projection.extract_viewport(cls.frame_array))
         cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.projection.vptiles)))
 
     def test_nm2xyz(self):
-        xyz = self.projection.nm2xyz(self.projection.coord_nm)
+        xyz = self.projection.nm2xyz(self.projection.nm)
         self.assertTrue(np.array_equal(xyz, self.xyz_test_data))
 
     def test_xyz2nm(self):
         nm = self.projection.xyz2nm(self.xyz_test_data)
-        self.assertTrue(np.array_equal(nm, self.projection.coord_nm))
+        self.assertTrue(np.array_equal(nm, self.projection.nm))
 
     def test_extract_viewport(self):
         vp_img = self.projection.extract_viewport(self.frame_array)

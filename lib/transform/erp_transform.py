@@ -45,14 +45,13 @@ def vu2erp(*, vu, proj_shape=None) -> np.ndarray:
     if proj_shape is None:
         proj_shape = vu.shape[1:]
 
-    shape = [2]
-    for i in range(len(vu.shape) - 1):
-        shape.append(1)
+    shape = np.ones([len(vu.shape)])
+    shape[0] = 2
 
-    n1 = np.asarray([proj_shape[0], proj_shape[1]]).reshape(shape)
+    n1 = np.asarray([proj_shape[0], proj_shape[1]]).reshape(shape.astype(int))
 
     nm = vu * (n1 - 1)
-    nm = np.floor(nm)
+    nm = nm + 0.5
     return nm.astype(int)
 
 
@@ -63,6 +62,7 @@ def ea2erp(*, ea: np.ndarray, proj_shape=None) -> np.ndarray:
     :param proj_shape: shape of projection in numpy format: (height, width)
     :return: (m, n) pixel coord using nearest neighbor
     """
+    from lib.transform.transform import normalize_ea
     ea = normalize_ea(ea=ea)
     vu = ea2vu(ea=ea)
     nm = vu2erp(vu=vu, proj_shape=proj_shape)

@@ -1,4 +1,5 @@
-from .tiling import Tiling, Tile
+from .tiling import Tiling
+from .tile import Tile
 from .projectionbase import ProjectionBase
 from .viewport import Viewport
 from .cmp import CMP
