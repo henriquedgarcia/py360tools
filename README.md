@@ -27,16 +27,16 @@ class lib.projectionbase.ProjBase(*, proj_res, fov, tiling = '1x1', vp_shape: = 
 import numpy as np
 from PIL import Image
 
-from lib.models.cmp import CMP
+from models.cmp import CMP
 
 # Create a instance of projection
-cmp = CMP(proj_res=f'600x400', tiling='6x4', fov_res='110x90')
+cmp = CMP(proj_res=f'600x400', tiling='6x4', fov='110x90')
 
 # Define the viewport position (in rads)
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport tiles
-viewport_tiles = cmp.vptiles()
+viewport_tiles = cmp.get_vptiles()
 
 print(viewport_tiles)  # ['3', '4', '5', '9', '10', '11', '12', '17']
 ```
@@ -47,7 +47,7 @@ print(viewport_tiles)  # ['3', '4', '5', '9', '10', '11', '12', '17']
 import numpy as np
 from PIL import Image
 
-from lib.models.cmp import CMP
+from models.cmp import CMP
 
 # Open a projection frame
 frame_img = Image.open('images/cmp1.png')
@@ -55,7 +55,7 @@ frame_array = np.array(frame_img)
 height, width, _ = frame_array.shape
 
 # Create a instance of projection
-cmp = CMP(proj_res=f'{width}x{height}', fov_res='110x90')
+cmp = CMP(proj_res=f'{width}x{height}', fov='110x90')
 
 # Define the viewport position (in rads)
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
@@ -80,7 +80,7 @@ Image.fromarray(frame_array).show()
 import numpy as np
 from PIL import Image
 
-from lib.models.cmp import CMP
+from models.cmp import CMP
 
 # Open a projection frame
 frame_img = Image.open('images/cmp1.png')
@@ -88,7 +88,7 @@ frame_array = np.array(frame_img)
 height, width, _ = frame_array.shape
 
 # Create a instance of projection
-cmp = CMP(proj_res=f'{width}x{height}', fov_res='110x90')
+cmp = CMP(proj_res=f'{width}x{height}', fov='110x90')
 
 # Define the viewport position (in rads)
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
@@ -114,3 +114,6 @@ Image.fromarray(vp_image).show()
 **Return**
 - ndarray<br>
 &nbsp;&nbsp;&nbsp;&nbsp; A ndarray with shape == (C, thickness*(2N+2M))
+
+## Install
+- `pip install -e .`
