@@ -1,9 +1,9 @@
-from lib.utils.lazyproperty import LazyProperty
+from py360tools.utils.lazyproperty import LazyProperty
 import numpy as np
 
 from .tile import Tile
 from .projectionframe import ProjectionFrame
-from lib.utils.util import splitx
+from py360tools.utils.util import splitx
 
 
 class Tiling:

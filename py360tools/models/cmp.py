@@ -1,6 +1,6 @@
-from lib.models.projectionbase import ProjectionBase
-from lib.transform.cmp_transform import (cmp2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface,
-                                         nmface2cmp_face)
+from py360tools.models.projectionbase import ProjectionBase
+from py360tools.transform.cmp_transform import (cmp2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface,
+                                                nmface2cmp_face)
 
 
 class CMP(ProjectionBase):

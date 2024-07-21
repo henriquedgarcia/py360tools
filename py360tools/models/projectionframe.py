@@ -1,6 +1,6 @@
 import numpy as np
 
-from lib.utils.util import splitx
+from py360tools.utils.util import splitx
 
 
 class ProjectionFrame:

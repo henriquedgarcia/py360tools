@@ -3,8 +3,8 @@ from typing import Union
 import numpy as np
 from PIL import Image
 
-from lib.models.projectionbase import ProjectionBase
-from lib.utils.util import get_borders_value
+from py360tools.models.projectionbase import ProjectionBase
+from py360tools.utils.util import get_borders_value
 
 
 def draw_vp_tiles(*, projection: ProjectionBase, lum=255):

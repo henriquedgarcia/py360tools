@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 
-from lib.transform.transform import rotate
-from lib.utils.lazyproperty import LazyProperty
+from py360tools.transform.transform import rotate
+from py360tools.utils.lazyproperty import LazyProperty
+
 
 class ViewportBase(ABC):
     fov: np.ndarray

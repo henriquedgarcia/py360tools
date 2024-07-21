@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from numpy.linalg import norm
 
-from lib.transform.transform import ea2xyz
+from py360tools.transform.transform import ea2xyz
 
 
 def position2displacement(df_positions):

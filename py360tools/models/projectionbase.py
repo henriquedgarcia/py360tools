@@ -1,14 +1,14 @@
-from lib.models.projectionframe import ProjectionFrame
-from lib.utils.util import create_nm_coords
+from .projectionframe import ProjectionFrame
+from py360tools.utils.util import create_nm_coords
 from abc import ABC, abstractmethod
 
 import cv2
 import numpy as np
 
-from lib.models.tiling import Tiling
-from lib.models.viewport import Viewport
-from lib.utils.lazyproperty import LazyProperty
-from lib.utils.util import splitx
+from py360tools.models.tiling import Tiling
+from py360tools.models.viewport import Viewport
+from py360tools.utils.lazyproperty import LazyProperty
+from py360tools.utils.util import splitx
 
 
 class ProjectionBase(ABC):
