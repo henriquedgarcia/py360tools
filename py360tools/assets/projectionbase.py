@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 
-from py360tools.models.tiling import Tiling
-from py360tools.models.viewport import Viewport
+from py360tools.assets.tiling import Tiling
+from py360tools.assets.viewport import Viewport
 from py360tools.utils.lazyproperty import LazyProperty
 from py360tools.utils.util import splitx
 

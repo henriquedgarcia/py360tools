@@ -1,4 +1,4 @@
-from py360tools.models.projectionbase import ProjectionBase
+from py360tools.assets.projectionbase import ProjectionBase
 from py360tools.transform.erp_transform import erp2vu, vu2ea, ea2vu, vu2erp
 from py360tools.transform.transform import ea2xyz, xyz2ea
 
