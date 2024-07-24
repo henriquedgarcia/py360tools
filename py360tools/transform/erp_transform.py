@@ -1,7 +1,9 @@
 import numpy as np
 
+from py360tools.utils.util import check_ea
 
-def erp2vu(*, nm: np.ndarray, proj_shape=None) -> np.ndarray:
+
+def nm2vu(*, nm: np.ndarray, proj_shape=None) -> np.ndarray:
     if proj_shape is None:
         proj_shape = nm.shape[1:]
 
@@ -41,7 +43,7 @@ def ea2vu(*, ea) -> np.ndarray:
     return vu
 
 
-def vu2erp(*, vu, proj_shape=None) -> np.ndarray:
+def vu2nm(*, vu, proj_shape=None) -> np.ndarray:
     if proj_shape is None:
         proj_shape = vu.shape[1:]
 
@@ -55,21 +57,20 @@ def vu2erp(*, vu, proj_shape=None) -> np.ndarray:
     return nm.astype(int)
 
 
-def ea2erp(*, ea: np.ndarray, proj_shape=None) -> np.ndarray:
+def ea2nm(*, ea: np.ndarray, proj_shape=None) -> np.ndarray:
     """
 
     :param ea: in rad
     :param proj_shape: shape of projection in numpy format: (height, width)
     :return: (m, n) pixel coord using nearest neighbor
     """
-    from lib.transform.transform import normalize_ea
-    ea = normalize_ea(ea=ea)
+    ea = check_ea(ea=ea)
     vu = ea2vu(ea=ea)
-    nm = vu2erp(vu=vu, proj_shape=proj_shape)
+    nm = vu2nm(vu=vu, proj_shape=proj_shape)
     return nm
 
 
-def erp2ea(*, nm: np.ndarray, proj_shape=None) -> np.ndarray:
-    vu = erp2vu(nm=nm, proj_shape=proj_shape)
+def nm2ea(*, nm: np.ndarray, proj_shape=None) -> np.ndarray:
+    vu = nm2vu(nm=nm, proj_shape=proj_shape)
     ea = vu2ea(vu=vu)
     return ea
