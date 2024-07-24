@@ -1,5 +1,3 @@
-from .frame import Frame
-from py360tools.utils.util import create_nm_coords
 from abc import ABC, abstractmethod
 
 import cv2
@@ -8,7 +6,8 @@ import numpy as np
 from py360tools.assets.tiling import Tiling
 from py360tools.assets.viewport import Viewport
 from py360tools.utils.lazyproperty import LazyProperty
-from py360tools.utils.util import splitx
+from py360tools.utils.util import create_nm_coords
+from .frame import Frame
 
 
 class ProjectionBase(ABC):
@@ -32,9 +31,8 @@ class ProjectionBase(ABC):
         self.tiling = Tiling(tiling, self.frame)
 
         # Build viewport
-
-        self.viewport = Viewport(resolution=fov_res,
-                                 fov=fov)
+        self.viewport = Viewport(resolution=vp_res,
+                                 fov=fov_res)
 
     def extract_viewport(self, frame_array):
         return extract_viewport(self, self.viewport, frame_array)
