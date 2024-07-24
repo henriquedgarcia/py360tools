@@ -1,8 +1,8 @@
 import numpy as np
 from pathlib import Path
 
-from py360tools.transform.cmp_transform import ea2cmp_face
-from py360tools.transform.erp_transform import ea2erp
+from py360tools.transform.cmp_transform import ea2nm_face
+from py360tools.transform.erp_transform import ea2nm
 
 
 class SpherePoints:
@@ -17,9 +17,9 @@ class SpherePoints:
             ea = np.array([[az], [el]])
 
             if proj == 'erp':
-                m, n = ea2erp(ea=ea, proj_shape=video_shape)
+                m, n = ea2nm(ea=ea, proj_shape=video_shape)
             elif proj == 'cmp':
-                (m, n), face = ea2cmp_face(ea=ea, proj_shape=video_shape)
+                (m, n), face = ea2nm_face(ea=ea, proj_shape=video_shape)
             else:
                 raise ValueError(f'wrong value to {proj=}')
 
