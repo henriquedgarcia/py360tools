@@ -5,5 +5,4 @@ from .viewport import Viewport
 from .projection_cmp import CMP
 from .projection_erp import ERP
 from .frame import Frame
-from ..transform.transform import rotate
 
