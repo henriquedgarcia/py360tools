@@ -4,9 +4,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-import lib.helper.draw as draw
-from lib.models.erp import ERP
-from lib.utils.util import load_test_data
+import py360tools.draw as draw
+from py360tools.assets import ERP
+from py360tools.utils import load_test_data
 
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent

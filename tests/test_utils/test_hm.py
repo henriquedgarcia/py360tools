@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from lib.utils import position2displacement
-from lib.utils.util import load_test_data
+from py360tools.transform import position2displacement
+from py360tools.utils import load_test_data
 
 """
 Teste Head Movement functions

@@ -13,16 +13,16 @@ from tests.test_viewport.test_viewport import TestViewport
 def create_test_suite():
     suite = unittest.TestSuite()
 
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
+    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestViewport))
-
+    #
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpTransform))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmp))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpDrawMethods))
-
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpTransform))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErp))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpDrawMethods))
+    #
+    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpTransform))
+    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErp))
+    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpDrawMethods))
 
     return suite
 

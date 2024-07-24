@@ -3,10 +3,10 @@ from pathlib import Path
 
 import numpy as np
 
-from lib.helper import show
-from lib.models.viewport import Viewport
-from lib.transform.transform import ea2xyz
-from lib.utils.util import load_test_data
+from py360tools.assets import Viewport
+from py360tools.draw import show
+from py360tools.transform import ea2xyz
+from py360tools.utils import load_test_data
 
 show = show
 __FILENAME__ = Path(__file__).absolute()
@@ -20,8 +20,8 @@ class TestViewport(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.viewport = Viewport(vp_shape=np.array([360, 440]),
-                                fov=np.array([np.deg2rad(90), np.deg2rad(110)]))
+        cls.viewport = Viewport(resolution='440x360',
+                                fov='110x90')
         cls.viewport.yaw_pitch_roll = (np.deg2rad(-0), np.deg2rad(0), np.deg2rad(0))
 
     def test_is_viewport(self):
