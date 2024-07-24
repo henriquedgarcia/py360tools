@@ -3,14 +3,13 @@ from pathlib import Path
 
 import numpy as np
 
-from lib.transform import (cmp2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface,
-                           nmface2cmp_face, cmp2ea_face)
+from py360tools.transform import (nm2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface,
+                                  nmface2nm_face, nm2ea_face)
+from py360tools.utils import create_nm_coords, create_test_default
 
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
 __ASSETS__ = __PATH__ / f'assets/{__FILENAME__.stem}'
-
-from lib.utils.util import create_nm_coords, create_test_default
 
 __ASSETS__.mkdir(parents=True, exist_ok=True)
 
@@ -36,22 +35,22 @@ class TestCmpTransform(unittest.TestCase):
         ea_file = Path(f'{__ASSETS__}/ae.pickle')
 
         cls.nm_test = create_test_default(nm_file, create_nm_coords, (height, width))
-        cls.nmface_test = create_test_default(nmface_file, cmp2nmface, nm=cls.nm_test)
+        cls.nmface_test = create_test_default(nmface_file, nm2nmface, nm=cls.nm_test)
         cls.vuface_test = create_test_default(vuface_file, nmface2vuface, nmface=cls.nmface_test)
         cls.xyz_face_test = create_test_default(xyz_file, vuface2xyz_face, vuface=cls.vuface_test)
-        cls.ea_face_test = create_test_default(ea_file, cmp2ea_face, nm=cls.nm_test)
+        cls.ea_face_test = create_test_default(ea_file, nm2ea_face, nm=cls.nm_test)
 
     def test_cmp2mn_face(self):
-        with self.subTest('Testing cmp2nmface.'):
-            nmface = cmp2nmface(nm=self.nm_test)
-            self.assertTrue(np.array_equal(self.nmface_test, nmface), 'Error in cmp2nmface()')
+        with self.subTest('Testing nm2nmface.'):
+            nmface = nm2nmface(nm=self.nm_test)
+            self.assertTrue(np.array_equal(self.nmface_test, nmface), 'Error in nm2nmface()')
 
-        with self.subTest('Testing nmface2cmp_face.'):
-            nm, face = nmface2cmp_face(nmface=self.nmface_test)
-            self.assertTrue(np.array_equal(self.nm_test, nm), 'Error in nmface2cmp_face()')
+        with self.subTest('Testing nmface2nm_face.'):
+            nm, face = nmface2nm_face(nmface=self.nmface_test)
+            self.assertTrue(np.array_equal(self.nm_test, nm), 'Error in nmface2nm_face()')
 
         with self.subTest('Testing reversion.'):
-            nm, face = nmface2cmp_face(nmface=nmface)
+            nm, face = nmface2nm_face(nmface=nmface)
             self.assertTrue(np.array_equal(self.nm_test, nm), 'Error in reversion')
 
     def test_nmface2vuface(self):
