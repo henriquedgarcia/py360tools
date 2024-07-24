@@ -1,4 +1,4 @@
-from .projectionframe import ProjectionFrame
+from .frame import Frame
 from py360tools.utils.util import create_nm_coords
 from abc import ABC, abstractmethod
 
@@ -26,15 +26,14 @@ class ProjectionBase(ABC):
         """
 
         # Build frame
-        self.frame = ProjectionFrame(proj_res)
+        self.frame = Frame(proj_res)
 
         # Build tiling
         self.tiling = Tiling(tiling, self.frame)
 
         # Build viewport
-        vp_shape = np.array(splitx(vp_res)[::-1])
-        fov = np.deg2rad(np.array(splitx(fov_res)[::-1]))
-        self.viewport = Viewport(vp_shape=vp_shape,
+
+        self.viewport = Viewport(resolution=fov_res,
                                  fov=fov)
 
     def extract_viewport(self, frame_array):
@@ -90,7 +89,7 @@ class ProjectionBase(ABC):
         return self.__class__.__name__
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.frame.proj_res}@{self.tiling})'
+        return f'{self.__class__.__name__}({self.frame.resolution}@{self.tiling})'
 
 
 def extract_viewport(projection, viewport, frame_array):
