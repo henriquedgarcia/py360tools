@@ -146,7 +146,7 @@ def create_test_default(path, func, *args, **kwargs):
     return data
 
 
-def normalize_ea(*, ea):
+def check_ea(*, ea):
     _90_deg = np.pi / 2
     _180_deg = np.pi
     _360_deg = 2 * np.pi
