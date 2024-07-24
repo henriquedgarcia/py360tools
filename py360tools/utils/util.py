@@ -144,3 +144,41 @@ def create_test_default(path, func, *args, **kwargs):
         data = func(*args, **kwargs)
         path.write_bytes(pickle.dumps(data))
     return data
+
+
+def normalize_ea(*, ea):
+    _90_deg = np.pi / 2
+    _180_deg = np.pi
+    _360_deg = 2 * np.pi
+
+    new_ea = np.zeros(ea.shape)
+    new_ea[0] = -np.abs(np.abs(ea[0] + _90_deg) - _180_deg) + _90_deg
+    new_ea[1] = (ea[1] + _180_deg) % _360_deg - _180_deg
+
+    return new_ea
+
+
+def check_deg(axis_name, value):
+    """
+
+    :param axis_name:
+    :type axis_name: str
+    :param value: in rad
+    :type value: float
+    :return:
+    :rtype: float
+    """
+    n_value = None
+    if axis_name == 'azimuth':
+        if value >= np.pi or value < -np.pi:
+            n_value = (value + np.pi) % (2 * np.pi)
+            n_value = n_value - np.pi
+        return n_value
+    elif axis_name == 'elevation':
+        if value > np.pi / 2:
+            n_value = 2 * np.pi - value
+        elif value < -np.pi / 2:
+            n_value = -2 * np.pi - value
+        return n_value
+    else:
+        raise ValueError('"axis_name" not exist.')

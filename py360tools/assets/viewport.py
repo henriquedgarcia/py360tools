@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 
-from py360tools.transform.transform import rotate
+from py360tools.assets.matrot import matrot
 from py360tools.utils.lazyproperty import LazyProperty
 
 
