@@ -24,7 +24,7 @@ class TestErpDrawMethods(unittest.TestCase):
         height, width = 288, 576
 
         cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}', vp_res='440x360', fov_res='110x90')
-        cls.projection._yaw_pitch_roll = np.deg2rad((70, 0, 0))
+        cls.projection.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
         # Open Image
         frame_img: Image = Image.open('images/erp1.png')

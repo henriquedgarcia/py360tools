@@ -34,7 +34,7 @@ class TestErp(unittest.TestCase):
         cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}',
                              vp_res='440x360',
                              fov_res='110x90')
-        cls.projection._yaw_pitch_roll = np.deg2rad((0, 0, 0))
+        cls.projection.yaw_pitch_roll = np.deg2rad((0, 0, 0))
 
         frame_img: Image = Image.open('images/erp1.png')
         frame_img = frame_img.resize((width, height))
