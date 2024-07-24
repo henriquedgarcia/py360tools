@@ -1,13 +1,13 @@
 import unittest
 
-from test.test_cmp.test_cmp import TestCmp
-from test.test_cmp.test_cmp_transform import TestCmpTransform
-from test.test_cmp.test_draw_cmp import TestCmpDrawMethods
-from test.test_erp.test_draw_erp import TestErpDrawMethods
-from test.test_erp.test_erp import TestErp
-from test.test_erp.test_erp_transform import TestErpTransform
-from test.test_utils.test_hm import TestPosition2Trajectory
-from test.test_viewport.test_viewport import TestViewport
+from tests.test_cmp.test_cmp import TestCmp
+from tests.test_cmp.test_cmp_transform import TestCmpTransform
+from tests.test_cmp.test_draw_cmp import TestCmpDrawMethods
+from tests.test_erp.test_draw_erp import TestErpDrawMethods
+from tests.test_erp.test_erp import TestErp
+from tests.test_erp.test_erp_transform import TestErpTransform
+from tests.test_utils.test_hm import TestPosition2Trajectory
+from tests.test_viewport.test_viewport import TestViewport
 
 
 def create_test_suite():
