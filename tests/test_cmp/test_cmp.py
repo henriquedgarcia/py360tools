@@ -5,9 +5,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from lib.helper import show
-from lib.models import CMP
-from lib.utils import load_test_data
+from py360tools.assets import CMP
+from py360tools.draw import show
+from py360tools.utils import load_test_data
 
 show = show
 __FILENAME__ = Path(__file__).absolute()
