@@ -1,5 +1,6 @@
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 from py360tools.transform.cmp_transform import ea2nm_face
 from py360tools.transform.erp_transform import ea2nm
