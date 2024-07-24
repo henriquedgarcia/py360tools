@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from py360tools.assets.matrot import matrot
+import py360tools.transform.transform
 from py360tools.utils import splitx
 from py360tools.utils.lazyproperty import LazyProperty
 
@@ -79,11 +79,11 @@ class Viewport:
 
     @property
     def normals(self) -> np.ndarray:
-        return matrot.rotate(self._normals, self.yaw_pitch_roll)
+        return py360tools.transform.transform.rotate(self._normals, self.yaw_pitch_roll)
 
     @property
     def xyz(self) -> np.ndarray:
-        return matrot.rotate(self._xyz, self.yaw_pitch_roll)
+        return py360tools.transform.transform.rotate(self._xyz, self.yaw_pitch_roll)
 
     def _normals_default(self):
         """
