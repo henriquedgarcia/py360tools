@@ -4,5 +4,6 @@ from .projection_base import ProjectionBase
 from .viewport import Viewport
 from .projection_cmp import CMP
 from .projection_erp import ERP
+from .frame import Frame
+from .matrot import matrot, rotate
 
-__all__ = ['Tiling', 'Tile', 'ProjectionBase', 'Viewport', 'CMP', 'ERP']
