@@ -33,7 +33,7 @@ from models.cmp import CMP
 cmp = CMP(proj_res=f'600x400', tiling='6x4', fov='110x90')
 
 # Define the viewport position (in rads)
-cmp._yaw_pitch_roll = np.deg2rad((70, 0, 0))
+cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport tiles
 viewport_tiles = cmp.get_vptiles()
@@ -58,7 +58,7 @@ height, width, _ = frame_array.shape
 cmp = CMP(proj_res=f'{width}x{height}', fov='110x90')
 
 # Define the viewport position (in rads)
-cmp._yaw_pitch_roll = np.deg2rad((70, 0, 0))
+cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport and borders mask
 vp_mask = cmp.draw_vp_mask(lum=255)
@@ -91,7 +91,7 @@ height, width, _ = frame_array.shape
 cmp = CMP(proj_res=f'{width}x{height}', fov='110x90')
 
 # Define the viewport position (in rads)
-cmp._yaw_pitch_roll = np.deg2rad((70, 0, 0))
+cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport image
 vp_image = cmp.get_viewport_image(frame_array)
