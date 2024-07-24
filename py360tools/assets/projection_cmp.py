@@ -1,4 +1,4 @@
-from py360tools.assets.projectionbase import ProjectionBase
+from py360tools.assets.projection_base import ProjectionBase
 from py360tools.transform.cmp_transform import (cmp2nmface, nmface2vuface, vuface2xyz_face, xyz2vuface, vuface2nmface,
                                                 nmface2cmp_face)
 
