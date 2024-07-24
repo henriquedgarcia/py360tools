@@ -3,7 +3,7 @@ import numpy as np
 from py360tools.transform.transform import ea2xyz, xyz2ea
 
 
-def cmp2nmface(*, nm, proj_shape=None) -> np.ndarray:
+def nm2nmface(*, nm, proj_shape=None) -> np.ndarray:
     """
 
     :param nm: shape(2, ...)
@@ -169,7 +169,7 @@ def vuface2nmface(*, vuface, proj_shape=None) -> np.ndarray:
     return nm_face.astype(int)
 
 
-def nmface2cmp_face(*, nmface, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
+def nmface2nm_face(*, nmface, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
     """
 
     :param nmface:
@@ -211,7 +211,7 @@ def nmface2cmp_face(*, nmface, proj_shape=None) -> tuple[np.ndarray, np.ndarray]
     return nm, face
 
 
-def xyz2cmp_face(*, xyz: np.ndarray, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
+def xyz2nm_face(*, xyz: np.ndarray, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
     """
 
     :param proj_shape:
@@ -220,11 +220,11 @@ def xyz2cmp_face(*, xyz: np.ndarray, proj_shape=None) -> tuple[np.ndarray, np.nd
     """
     vuface = xyz2vuface(xyz=xyz)
     nmface = vuface2nmface(vuface=vuface, proj_shape=proj_shape)
-    nm, face = nmface2cmp_face(nmface=nmface, proj_shape=proj_shape)
+    nm, face = nmface2nm_face(nmface=nmface, proj_shape=proj_shape)
     return nm, face
 
 
-def ea2cmp_face(*, ea: np.ndarray, proj_shape: tuple = None) -> tuple[np.ndarray, np.ndarray]:
+def ea2nm_face(*, ea: np.ndarray, proj_shape: tuple = None) -> tuple[np.ndarray, np.ndarray]:
     """
     The face must be a square. proj_shape must have 3:2 ratio
     :param ea: in rad
@@ -232,12 +232,12 @@ def ea2cmp_face(*, ea: np.ndarray, proj_shape: tuple = None) -> tuple[np.ndarray
     :return: (nm, face) pixel coord using nearest neighbor
     """
     xyz = ea2xyz(ea=ea)
-    nm, face = xyz2cmp_face(xyz=xyz, proj_shape=proj_shape)
+    nm, face = xyz2nm_face(xyz=xyz, proj_shape=proj_shape)
     return nm, face
 
 
-def cmp2ea_face(*, nm: np.ndarray, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
-    nmface = cmp2nmface(nm=nm, proj_shape=proj_shape)
+def nm2ea_face(*, nm: np.ndarray, proj_shape=None) -> tuple[np.ndarray, np.ndarray]:
+    nmface = nm2nmface(nm=nm, proj_shape=proj_shape)
     vuface = nmface2vuface(nmface=nmface, proj_shape=proj_shape)
     xyz, face = vuface2xyz_face(vuface=vuface)
     ae = xyz2ea(xyz=xyz)
