@@ -22,7 +22,7 @@ class TestViewport(unittest.TestCase):
     def setUpClass(cls):
         cls.viewport = Viewport(vp_shape=np.array([360, 440]),
                                 fov=np.array([np.deg2rad(90), np.deg2rad(110)]))
-        cls.viewport.yaw_pitch_roll = (np.deg2rad(-0), np.deg2rad(0), np.deg2rad(0))
+        cls.viewport._yaw_pitch_roll = (np.deg2rad(-0), np.deg2rad(0), np.deg2rad(0))
 
     def test_is_viewport(self):
         is_viewport_test_file = Path(f'{__ASSETS__}/TestViewport_is_viewport_test_file.pickle')
