@@ -2,7 +2,7 @@ from py360tools.utils.lazyproperty import LazyProperty
 import numpy as np
 
 from .tile import Tile
-from .projectionframe import ProjectionFrame
+from .frame import Frame
 from py360tools.utils.util import splitx
 
 
@@ -19,10 +19,10 @@ class Tiling:
         :param tiling: "12x8"
         :type tiling: str
         :param projection_frame: "12x8"
-        :type projection_frame: ProjectionFrame
+        :type projection_frame: Frame
         """
         self.tiling = tiling
-        self.proj_res = projection_frame.proj_res
+        self.proj_res = projection_frame.resolution
         self.shape = np.array(splitx(tiling)[::-1])
         self.ntiles = self.shape[0] * self.shape[1]
         self.tile_shape = (projection_frame.shape / self.shape).astype(int)
