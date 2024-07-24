@@ -1,8 +1,8 @@
 import numpy as np
 from pathlib import Path
 
-from lib.py360tools.lib.transform.cmp_transform import ea2cmp_face
-from lib.py360tools.lib.transform.erp_transform import ea2erp
+from py360tools.transform.cmp_transform import ea2cmp_face
+from py360tools.transform.erp_transform import ea2erp
 
 
 class SpherePoints:
