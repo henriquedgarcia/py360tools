@@ -1,31 +1,33 @@
-from abc import ABC, abstractmethod
-
 import cv2
 import numpy as np
 
 from py360tools.assets.matrot import matrot
+from py360tools.utils import splitx
 from py360tools.utils.lazyproperty import LazyProperty
 
 
-class ViewportBase(ABC):
+class Viewport:
     fov: np.ndarray
     vp_shape: np.ndarray
 
-    def __init__(self, vp_shape, fov):
+    def __init__(self, resolution, fov):
         """
         Viewport Class used to extract view pixels in projections.
         The vp is an image as numpy array with shape (H, M, 3).
         That can be RGB (matplotlib, pillow, etc.) or BGR (opencv).
 
-        :param vp_shape: (600, 800) for 800x600px
-        :type vp_shape: np.ndarray
-        :param fov: in rad. Ex: "np.array((pi/2, pi*2/3))" for (120°x90°)
-        :type fov: np.ndarray
+        :param resolution: '800x600'
+        :type resolution: str
+        :param fov: '120x90' for (120°x90°)
+        :type fov: str
         """
-        self.vp_shape = vp_shape
-        self.fov = fov
+        self.vp_shape = np.array(splitx(resolution)[::-1])
+        self.fov = np.deg2rad(np.array(splitx(fov)[::-1]))
 
-    @abstractmethod
+        self._normals = self._normals_default()
+        self._xyz = self._xyz_default
+        self._yaw_pitch_roll = np.array([0., 0., 0.])
+
     def extract_viewport(self, projection, frame_array):
         """
 
@@ -36,9 +38,14 @@ class ViewportBase(ABC):
         :return:
         :type:
         """
-        pass
+        nm_coord = projection.xyz2nm(self.xyz)
+        nm_coord = nm_coord.transpose((1, 2, 0))
+        vp_img = cv2.remap(frame_array, map1=nm_coord[..., 1:2].astype(np.float32),
+                           map2=nm_coord[..., 0:1].astype(np.float32), interpolation=cv2.INTER_LINEAR,
+                           borderMode=cv2.BORDER_WRAP)
+        # show(vp_img)
+        return vp_img
 
-    @abstractmethod
     def is_viewport(self, x_y_z):
         """
         Check if the plane equation is true to viewport
@@ -52,73 +59,12 @@ class ViewportBase(ABC):
         :rtype: bool
 
         """
-        pass
-
-    @property
-    @abstractmethod
-    def xyz(self):
-        """
-
-        :return: None
-        :return: np.ndarray
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def normals(self):
-        """
-
-        :return: None
-        :return: np.ndarray
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def yaw_pitch_roll(self):
-        """
-
-        :return: None
-        :return: np.ndarray
-        """
-        pass
-
-    @yaw_pitch_roll.setter
-    @abstractmethod
-    def yaw_pitch_roll(self, value):
-        """
-
-        :param value:
-        :type value:  np.ndarray
-        :return: None
-        """
-        pass
-
-
-class Viewport(ViewportBase):
-    def __init__(self, vp_shape, fov):
-        super().__init__(vp_shape, fov)
-        self._normals = self._normals_default()
-        self._xyz = self._xyz_default
-        self._yaw_pitch_roll = np.array([0., 0., 0.])
-
-    def extract_viewport(self, projection, frame_array):
-        nm_coord = projection.xyz2nm(self.xyz)
-        nm_coord = nm_coord.transpose((1, 2, 0))
-        vp_img = cv2.remap(frame_array, map1=nm_coord[..., 1:2].astype(np.float32),
-                           map2=nm_coord[..., 0:1].astype(np.float32), interpolation=cv2.INTER_LINEAR,
-                           borderMode=cv2.BORDER_WRAP)
-        # show(vp_img)
-        return vp_img
-
-    def is_viewport(self, x_y_z):
         inner_prod = np.tensordot(self.normals.T, x_y_z, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
         return belong
 
     @property
-    def yaw_pitch_roll(self):
+    def yaw_pitch_roll(self) -> np.ndarray:
         return self._yaw_pitch_roll
 
     @yaw_pitch_roll.setter
@@ -133,11 +79,11 @@ class Viewport(ViewportBase):
 
     @property
     def normals(self) -> np.ndarray:
-        return rotate(self._normals, self.yaw_pitch_roll)
+        return matrot.rotate(self._normals, self.yaw_pitch_roll)
 
     @property
     def xyz(self) -> np.ndarray:
-        return rotate(self._xyz, self.yaw_pitch_roll)
+        return matrot.rotate(self._xyz, self.yaw_pitch_roll)
 
     def _normals_default(self):
         """
