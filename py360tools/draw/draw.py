@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 
 from py360tools.assets.projection_base import ProjectionBase
-from py360tools.utils.util import get_borders_value
+from py360tools.utils.util_transform import get_borders_value
 
 
 def draw_vp_tiles(*, projection: ProjectionBase, lum=255):

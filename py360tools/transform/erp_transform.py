@@ -1,6 +1,6 @@
 import numpy as np
 
-from py360tools.utils.util import check_ea
+from py360tools.utils.util_transform import check_ea
 
 
 def nm2vu(*, nm: np.ndarray, proj_shape=None) -> np.ndarray:
