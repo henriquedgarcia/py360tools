@@ -4,11 +4,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-import lib.helper.draw as draw
-from lib.models import CMP, Viewport
-from lib.utils.util import load_test_data
-# draw.show(get_viewport_image)
-import lib.helper.draw as draw
+import py360tools.draw as draw
+from py360tools.assets import CMP
+from py360tools.utils import load_test_data
 
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
