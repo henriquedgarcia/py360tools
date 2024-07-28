@@ -59,7 +59,9 @@ class TestCmp(unittest.TestCase):
         self.assertTrue(np.array_equal(vp_img, self.vp_img_test_data))
 
     def test_get_vptiles(self):
-        self.assertTrue(np.array_equal(self.vptiles_test_data, list(map(int, self.projection.vptiles))))
+        get_vptiles = list(map(int, self.projection.vptiles))
+        # print(get_vptiles)
+        self.assertTrue(np.array_equal(self.vptiles_test_data, get_vptiles))
 
 
 def load_xyz_test_data(xyz_test_data):
