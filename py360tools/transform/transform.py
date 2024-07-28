@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from numpy.linalg import norm
 
-from py360tools.assets.rotate import Rotate
+from py360tools.assets.matrot import MatRot
 
 
 def ea2xyz(*, ea: np.ndarray) -> np.ndarray:
@@ -40,9 +40,6 @@ def xyz2ea(*, xyz):
     return ea
 
 
-rotate = Rotate.rotate
-
-
 def position2displacement(df_positions):
     """
     Converts a position to a trajectory dataframe. The positions should have the 2 columns:
@@ -66,3 +63,8 @@ def position2displacement(df_positions):
     inst_angle = np.arccos(dot_product)
 
     return pd.DataFrame(inst_angle, columns=['displacement'])
+
+
+def rotate(xyz, yaw_pitch_roll):
+    matrix = MatRot.get_matrix(yaw_pitch_roll)
+    return np.tensordot(matrix, xyz, axes=1)
