@@ -10,24 +10,26 @@ from tests.test_utils.test_hm import TestPosition2Trajectory
 from tests.test_viewport.test_viewport import TestViewport
 
 
-def create_test_suite():
-    suite = unittest.TestSuite()
-
-    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestViewport))
-    #
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpTransform))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmp))
-    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpDrawMethods))
-    #
-    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpTransform))
-    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErp))
-    # suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpDrawMethods))
-
-    return suite
-
-
 if __name__ == '__main__':
-    test_suite = create_test_suite()
-    runner = unittest.TextTestRunner()
-    runner.run(test_suite)
+    runner = unittest.TextTestRunner(verbosity=2)
+
+    print('\nRUNNING VIEWPORT TESTS')
+    suite_viewport = unittest.TestSuite()
+    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
+    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestViewport))
+    runner.run(suite_viewport)
+    #
+    print('\nRUNNING CMP TESTS')
+    suite_cmp = unittest.TestSuite()
+    suite_cmp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpTransform))
+    suite_cmp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmp))
+    suite_cmp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCmpDrawMethods))
+    runner.run(suite_cmp)
+    #
+    print('\nRUNNING ERP TESTS')
+    suite_erp = unittest.TestSuite()
+    suite_erp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpTransform))
+    suite_erp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErp))
+    suite_erp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpDrawMethods))
+    runner.run(suite_erp)
+
