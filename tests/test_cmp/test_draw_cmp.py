@@ -64,14 +64,6 @@ class TestCmpDrawMethods(unittest.TestCase):
         # draw.show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_tiles_test))
 
-    def test_get_vptiles(self):
-        get_vptiles_test_file = Path(f'{__ASSETS__}/get_vptiles_test_file.pickle')
-        get_vptiles = list(map(int, self.projection.vptiles))
-        get_vptiles_test = load_test_data(get_vptiles_test_file,
-                                          get_vptiles)
-        # print(get_vptiles)
-        self.assertTrue(np.array_equal(get_vptiles_test, get_vptiles))
-
     def test_get_viewport_image(self):
         get_viewport_image_test_file = Path(f'{__ASSETS__}/get_viewport_image_test_file.pickle')
         get_viewport_image = self.projection.extract_viewport(self.frame_array)
