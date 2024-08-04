@@ -24,7 +24,7 @@ class TestErpDrawMethods(unittest.TestCase):
         height, width = 288, 576
 
         cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}', vp_res='440x360', fov_res='110x90')
-        cls.projection.yaw_pitch_roll = np.deg2rad((70, 0, 0))
+        cls.projection.yaw_pitch_roll = np.deg2rad((0, 0, 0))
 
         # Open Image
         frame_img: Image = Image.open('images/erp1.png')
@@ -66,14 +66,6 @@ class TestErpDrawMethods(unittest.TestCase):
         # draw.show(draw_vp_tiles)
         self.assertTrue(np.array_equal(draw_vp_tiles_test, draw_vp_tiles))
 
-    def test_get_vptiles(self):
-        get_vptiles_test_file = Path(f'{__ASSETS__}/get_vptiles_test_file.pickle')
-        get_vptiles = list(map(int, self.projection.vptiles))
-        get_vptiles_test = load_test_data(get_vptiles_test_file,
-                                          get_vptiles)
-        # print(get_vptiles)
-        self.assertTrue(np.array_equal(get_vptiles_test, get_vptiles))
-
     def test_get_viewport_image(self):
         get_viewport_image_test_file = Path(f'{__ASSETS__}/get_viewport_image_test_file.pickle')
         get_viewport_image = self.projection.extract_viewport(self.frame_array)
@@ -81,3 +73,11 @@ class TestErpDrawMethods(unittest.TestCase):
                                                  get_viewport_image)
         # draw.show(get_viewport_image)
         self.assertTrue(np.array_equal(get_viewport_image_test, get_viewport_image))
+
+    def test_get_vptiles(self):
+        get_vptiles_test_file = Path(f'{__ASSETS__}/get_vptiles_test_file.pickle')
+        get_vptiles = list(map(int, self.projection.get_vptiles()))
+        get_vptiles_test = load_test_data(get_vptiles_test_file,
+                                          get_vptiles)
+        # print(get_vptiles)
+        self.assertTrue(np.array_equal(get_vptiles_test, get_vptiles))

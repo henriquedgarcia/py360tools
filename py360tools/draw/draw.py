@@ -14,8 +14,8 @@ def draw_vp_tiles(*, projection: ProjectionBase, lum=255):
     :param lum:
     :return:
     """
-    canvas = np.zeros(projection.frame.shape, dtype='uint8')
-    for tile in projection.vptiles:
+    canvas = np.zeros(projection.canvas.shape, dtype='uint8')
+    for tile in projection.get_vptiles():
         canvas = canvas + draw_tile_border(projection=projection, idx=int(tile), lum=lum)
     return canvas
 
@@ -27,7 +27,7 @@ def draw_all_tiles_borders(*, projection: ProjectionBase, lum=255):
     :param lum:
     :return:
     """
-    canvas = np.zeros(projection.frame.shape, dtype='uint8')
+    canvas = np.zeros(projection.canvas.shape, dtype='uint8')
     for tile in projection.tiling.tile_list:
         canvas = canvas + draw_tile_border(projection=projection, idx=int(tile), lum=lum)
     return canvas
@@ -42,7 +42,7 @@ def draw_tile_border(*, projection: ProjectionBase, idx, lum=255) -> np.ndarray:
     :param lum:
     :return:
     """
-    canvas = np.zeros(projection.frame.shape, dtype='uint8')
+    canvas = np.zeros(projection.canvas.shape, dtype='uint8')
     canvas[projection.tiling.tile_list[idx].borders_nm[0], projection.tiling.tile_list[idx].borders_nm[1]] = lum
     return canvas
 
@@ -54,7 +54,7 @@ def draw_vp_mask(*, projection: ProjectionBase, lum=255) -> np.ndarray:
     :param lum: value to draw line
     :return: a numpy.ndarray with one deep color
     """
-    canvas = np.zeros(projection.frame.shape, dtype='uint8')
+    canvas = np.zeros(projection.canvas.shape, dtype='uint8')
     belong = projection.viewport.is_viewport(projection.xyz)
     canvas[belong] = lum
 
@@ -69,7 +69,7 @@ def draw_vp_borders(*, projection: ProjectionBase, thickness=1, lum=255):
     :param thickness: in pixel.
     :return: a numpy.ndarray with one deep color
     """
-    canvas = np.zeros(projection.frame.shape, dtype='uint8')
+    canvas = np.zeros(projection.canvas.shape, dtype='uint8')
 
     vp_borders_xyz = get_borders_value(array=projection.viewport.xyz, thickness=thickness)
     nm = projection.xyz2nm(vp_borders_xyz).astype(int)

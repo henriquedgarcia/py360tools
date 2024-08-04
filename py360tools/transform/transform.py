@@ -68,3 +68,21 @@ def position2displacement(df_positions):
 def rotate(xyz, yaw_pitch_roll):
     matrix = MatRot.get_matrix(yaw_pitch_roll)
     return np.tensordot(matrix, xyz, axes=1)
+
+
+def get_vptiles(projection, viewport):
+    """
+
+    :param projection:
+    :param viewport:
+    :return:
+    :rtype: list[Tile]
+    """
+    if str(projection.tiling) == '1x1': return [tile for tile in projection.tiling.tile_list]
+
+    vptiles = []
+    for tile in projection.tiling.tile_list:
+        borders_xyz = projection.nm2xyz(tile.borders_nm)
+        if np.any(viewport.is_viewport(borders_xyz)):
+            vptiles.append(tile)
+    return vptiles

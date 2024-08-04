@@ -43,7 +43,7 @@ class TestCmp(unittest.TestCase):
         # Load expected values
         cls.xyz_test_data = load_test_data(xyz_file, cls.projection.xyz)
         cls.vp_img_test_data = load_test_data(vp_img_file, cls.projection.extract_viewport(cls.frame_array))
-        cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.projection.vptiles)))
+        cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.projection.get_vptiles())))
 
     def test_nm2xyz(self):
         xyz = self.projection.nm2xyz(self.projection.nm)
@@ -59,7 +59,7 @@ class TestCmp(unittest.TestCase):
         self.assertTrue(np.array_equal(vp_img, self.vp_img_test_data))
 
     def test_get_vptiles(self):
-        get_vptiles = list(map(int, self.projection.vptiles))
+        get_vptiles = list(map(int, self.projection.get_vptiles()))
         # print(get_vptiles)
         self.assertTrue(np.array_equal(self.vptiles_test_data, get_vptiles))
 

@@ -3,7 +3,7 @@ import numpy as np
 from py360tools.utils.util import splitx
 
 
-class Frame:
+class Canvas:
     def __init__(self, resolution):
         """
 
@@ -14,3 +14,9 @@ class Frame:
         # build_projection
         self.resolution = resolution
         self.shape = np.array(splitx(self.resolution)[::-1], dtype=int)
+
+    def __str__(self):
+        return self.resolution
+
+    def __repr__(self):
+        return self.resolution

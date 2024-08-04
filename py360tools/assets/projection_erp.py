@@ -5,7 +5,7 @@ from py360tools.transform.transform import ea2xyz, xyz2ea
 
 class ERP(ProjectionBase):
     def nm2xyz(self, nm):
-        vu = nm2vu(nm=nm, proj_shape=self.frame.shape)
+        vu = nm2vu(nm=nm, proj_shape=self.canvas.shape)
         ea = vu2ea(vu=vu)
         xyz = ea2xyz(ea=ea)  # common
         return xyz
@@ -13,5 +13,5 @@ class ERP(ProjectionBase):
     def xyz2nm(self, xyz):
         ea = xyz2ea(xyz=xyz)
         vu = ea2vu(ea=ea)
-        nm = vu2nm(vu=vu, proj_shape=self.frame.shape)
+        nm = vu2nm(vu=vu, proj_shape=self.canvas.shape)
         return nm

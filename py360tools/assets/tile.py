@@ -1,13 +1,9 @@
-import numpy as np
-
-from py360tools.utils.util_transform import get_tile_borders
+from py360tools.utils.lazyproperty import LazyProperty
+from py360tools.utils.util import unflatten_index
+from py360tools.utils.util_transform import get_borders_coord_nm
 
 
 class Tile:
-    shape: np.ndarray = None
-    borders_nm: np.ndarray = None
-    position_nm: np.ndarray = None
-
     def __init__(self, tile_id, tiling):
         """
         # Property
@@ -20,10 +16,20 @@ class Tile:
         :type tiling: Tiling
         """
         self.tile_id = int(tile_id)
-        self.tiling = str(tiling)
+        self.tiling = tiling
+        self.tiling_position = unflatten_index(self.tile_id, tiling.shape)  # (x, y)
         self.shape = tiling.tile_shape
-        self.borders_nm = get_tile_borders(tile_id, tiling.shape, self.shape)
-        self.position_nm = self.borders_nm[::, 0]
+
+        self.position_nm = self.tiling_position * self.shape[::-1]
+
+    @LazyProperty
+    def borders_nm(self):
+        return get_borders_coord_nm(position=self.position_nm,
+                                    shape=self.shape)
+
+    @LazyProperty
+    def borders_xyz(self):
+        return self.tiling.projection.nm2xyz(self.borders_nm)
 
     def __str__(self):
         return f'tile{self.tile_id}'

@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 from py360tools.utils.util import unflatten_index
@@ -38,6 +39,30 @@ def get_borders_value(*,
     return np.unique(borders_value, axis=1)
 
 
+def get_borders_coord_nm(*, position, shape):
+    """
+
+    :param position: (x, y)
+    :type position: list | tuple | np.ndarray
+    :param shape: (H, W)
+    :type shape: list | tuple | np.ndarray
+    :return: shape==(C, thickness*(2N+2M))
+    :rtype: np.ndarray
+    """
+    x1 = position[0]
+    x2 = position[0] + shape[1]
+    y1 = position[1]
+    y2 = position[1] + shape[0]
+
+    top_border = np.array(np.mgrid[y1:y1 + 1, x1:x2]).reshape(2, -1)
+    bottom_border = np.array(np.mgrid[y2 - 1:y2, x1:x2]).reshape(2, -1)
+    left_border = np.array(np.mgrid[y1 + 1:y2 - 1, x1:x1 + 1]).reshape(2, -1)
+    right_border = np.array(np.mgrid[y1 + 1:y2 - 1, x2 - 1:x2]).reshape(2, -1)
+
+    borders = np.c_[top_border, bottom_border, left_border, right_border]
+    return borders
+
+
 def get_tile_borders(tile_id, tiling_shape, tile_shape):
     """
 
@@ -69,3 +94,26 @@ def get_tile_borders(tile_id, tiling_shape, tile_shape):
 def create_nm_coords(shape=(200, 300)):
     nm_test = np.mgrid[0:shape[0], 0:shape[1]]
     return nm_test
+
+
+def extract_viewport(projection, viewport, proj_img_array):
+    """
+
+    :param projection:
+    :param viewport:
+    :type viewport: Viewport
+    :param proj_img_array:
+    :type proj_img_array: np.ndarray
+    :return:
+    :type:
+    """
+
+    nm_coord = projection.xyz2nm(viewport.xyz)
+    nm_coord = nm_coord.transpose((1, 2, 0))
+    vp_img = cv2.remap(proj_img_array,
+                       map1=nm_coord[..., 1:2].astype(np.float32),
+                       map2=nm_coord[..., 0:1].astype(np.float32),
+                       interpolation=cv2.INTER_LINEAR,
+                       borderMode=cv2.BORDER_WRAP)
+    # show(vp_img)
+    return vp_img

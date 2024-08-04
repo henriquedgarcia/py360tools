@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 
-import cv2
 import numpy as np
 
 from py360tools.assets.tiling import Tiling
 from py360tools.assets.viewport import Viewport
 from py360tools.utils.lazyproperty import LazyProperty
-from py360tools.utils.util import create_nm_coords
-from .frame import Frame
+from py360tools.utils.util_transform import create_nm_coords
+from .canvas import Canvas
+from ..transform.transform import get_vptiles
+from ..utils.util_transform import extract_viewport
 
 
 class ProjectionBase(ABC):
@@ -23,19 +24,15 @@ class ProjectionBase(ABC):
         :param fov_res:
         :type fov_res: str
         """
-
         # Build frame
-        self.frame = Frame(proj_res)
+        self.canvas = Canvas(proj_res)
 
         # Build tiling
-        self.tiling = Tiling(tiling, self.frame)
+        self.tiling = Tiling(tiling, self)
 
         # Build viewport
         self.viewport = Viewport(resolution=vp_res,
                                  fov=fov_res)
-
-    def extract_viewport(self, frame_array):
-        return extract_viewport(self, self.viewport, frame_array)
 
     @abstractmethod
     def nm2xyz(self, nm) -> np.ndarray:
@@ -49,7 +46,7 @@ class ProjectionBase(ABC):
         pass
 
     @abstractmethod
-    def xyz2nm(self, xyz: np.ndarray) -> np.ndarray:
+    def xyz2nm(self, xyz) -> np.ndarray:
         """
         Projection specific.
 
@@ -61,53 +58,38 @@ class ProjectionBase(ABC):
 
     @LazyProperty
     def nm(self):
-        return create_nm_coords(self.frame.shape)
+        return create_nm_coords(self.canvas.shape)
 
     @LazyProperty
     def xyz(self):
         return self.nm2xyz(self.nm)
 
     @property
-    def vptiles(self):
+    def yaw_pitch_roll(self):
+        return self.viewport.yaw_pitch_roll
+
+    @yaw_pitch_roll.setter
+    def yaw_pitch_roll(self, value):
+        self.viewport.yaw_pitch_roll = value
+
+    def extract_viewport(self, frame_array, yaw_pitch_roll=None):
+        if yaw_pitch_roll is not None:
+            self.viewport.yaw_pitch_roll = yaw_pitch_roll
+        return extract_viewport(self, self.viewport, frame_array)
+
+    def get_vptiles(self, yaw_pitch_roll=None):
         """
 
         :return: Return a list with all the tiles used in the viewport.
         :rtype: list[Tile]
         """
-        if str(self.tiling) == '1x1': return [tile for tile in self.tiling.tile_list]
-
-        vptiles = []
-        for tile in self.tiling.tile_list:
-            borders_xyz = self.nm2xyz(tile.borders_nm)
-            if np.any(self.viewport.is_viewport(borders_xyz)):
-                vptiles.append(tile)
+        if yaw_pitch_roll is not None:
+            self.viewport.yaw_pitch_roll = yaw_pitch_roll
+        vptiles = get_vptiles(self, self.viewport)
         return vptiles
 
     def __str__(self):
-        return self.__class__.__name__
+        return f'{self.__class__.__name__}({self.canvas})'
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.frame.resolution}@{self.tiling})'
-
-
-def extract_viewport(projection, viewport, frame_array):
-    """
-
-    :param projection:
-    :param viewport:
-    :type viewport: Viewport
-    :param frame_array:
-    :type frame_array: np.ndarray
-    :return:
-    :type:
-    """
-
-    nm_coord = projection.xyz2nm(viewport.xyz)
-    nm_coord = nm_coord.transpose((1, 2, 0))
-    vp_img = cv2.remap(frame_array,
-                       map1=nm_coord[..., 1:2].astype(np.float32),
-                       map2=nm_coord[..., 0:1].astype(np.float32),
-                       interpolation=cv2.INTER_LINEAR,
-                       borderMode=cv2.BORDER_WRAP)
-    # show(vp_img)
-    return vp_img
+        return f'{self.__class__.__name__}({self.canvas}@{self.tiling})'

@@ -24,6 +24,7 @@ class lib.projectionbase.ProjBase(*, proj_res, fov, tiling = '1x1', vp_shape: = 
 ### Get the tiles touched by viewport
 
 ```python
+import py360tools.transform.transform
 import numpy as np
 from PIL import Image
 
@@ -36,7 +37,7 @@ cmp = CMP(proj_res=f'600x400', tiling='6x4', fov='110x90')
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
 
 # Get the viewport tiles
-viewport_tiles = cmp.get_vptiles()
+viewport_tiles = py360tools.transform.transform.get_vptiles()
 
 print(viewport_tiles)  # ['3', '4', '5', '9', '10', '11', '12', '17']
 ```

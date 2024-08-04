@@ -1,4 +1,4 @@
-from .frame import Frame
+from .canvas import Canvas
 from .projection_base import ProjectionBase
 from .projection_cmp import CMP
 from .projection_erp import ERP
