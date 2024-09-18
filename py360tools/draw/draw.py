@@ -115,7 +115,7 @@ def compose(img: np.ndarray,
             mask_opacity: float = 1.0
             ):
     assert img.shape[:2] == mask.shape[:2], "Image and mask must be the same shape"
-
+    img = img.copy()
     mask_opacity = np.array(mask_opacity)
     img[mask > 0] = (img[mask > 0] * (1 - mask_opacity) + color * mask_opacity).astype('uint8')
     return img
