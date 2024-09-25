@@ -52,11 +52,12 @@ class LazyProperty:
         if instance is None:
             raise AttributeError("The descriptor must be used with class instances.")
 
-        if self.setter is None:
+        setattr(instance, self.attr_name, value)
+
+        if self.setter is not None:
+            self.setter(instance, value)
             raise AttributeError(f"Setter not defined for '{self.name}'")
 
-        setattr(instance, self.attr_name, value)
-        self.setter(instance, value)
 
     def __delete__(self, instance):
         if instance is None:
