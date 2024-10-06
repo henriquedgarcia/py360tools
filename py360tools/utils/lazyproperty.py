@@ -1,5 +1,14 @@
+from typing import Callable
+
+
 class LazyProperty:
-    def __init__(self, getter, setter=None, deleter=None):
+    setter: Callable
+    setter: Callable
+    deleter: Callable
+    name: str
+    attr_name: str
+
+    def __init__(self, getter):
         """
         Creates a property that waits for the first use to be initialized. After this, it always returns the same
         result.
@@ -26,46 +35,47 @@ class LazyProperty:
         The value is stored in Bar._foo only once.
 
         :param getter:
-        :param setter:
+        :type getter: Callable
         """
         self.getter = getter
-        self.setter = setter
-        self.deleter = deleter
         self.name = self.getter.__name__
         self.attr_name = '_' + self.name
 
     def __get__(self, instance, owner):
-        if instance is None:
-            raise AttributeError(f"The descriptor must be used with class instances.")
+        """
+        Run getter after getattr
 
+        :param instance:
+        :param owner:
+        :return:
+        """
         try:
             value = getattr(instance, self.attr_name)
-            if value is None:
-                raise AttributeError
         except AttributeError:
             value = self.getter(instance)
             setattr(instance, self.attr_name, value)
-
         return value
 
     def __set__(self, instance, value):
-        if instance is None:
-            raise AttributeError("The descriptor must be used with class instances.")
+        """
+        Run setter after setattr
 
+        :param instance:
+        :param value:
+        :return:
+        """
         setattr(instance, self.attr_name, value)
 
         if self.setter is not None:
             self.setter(instance, value)
-            raise AttributeError(f"Setter not defined for '{self.name}'")
-
 
     def __delete__(self, instance):
-        if instance is None:
-            raise AttributeError("The descriptor must be used with class instances.")
-
+        """
+        Run deleter before delattr
+        :param instance:
+        :return:
+        """
         if self.deleter is not None:
             self.deleter(instance)
-        try:
-            delattr(instance, '_' + self.name)
-        except AttributeError:
-            pass
+
+        delattr(instance, '_' + self.name)
