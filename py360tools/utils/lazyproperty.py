@@ -2,9 +2,8 @@ from typing import Callable
 
 
 class LazyProperty:
-    setter: Callable
-    setter: Callable
-    deleter: Callable
+    _setter: Callable = None
+    _deleter: Callable = None
     name: str
     attr_name: str
 
@@ -66,8 +65,8 @@ class LazyProperty:
         """
         setattr(instance, self.attr_name, value)
 
-        if self.setter is not None:
-            self.setter(instance, value)
+        if self._setter is not None:
+            self._setter(instance, value)
 
     def __delete__(self, instance):
         """
@@ -75,7 +74,13 @@ class LazyProperty:
         :param instance:
         :return:
         """
-        if self.deleter is not None:
-            self.deleter(instance)
+        if self._deleter is not None:
+            self._deleter(instance)
 
         delattr(instance, '_' + self.name)
+
+    def setter(self, value: Callable):
+        self._setter = value
+
+    def deleter(self, value: Callable):
+        self._deleter = value
