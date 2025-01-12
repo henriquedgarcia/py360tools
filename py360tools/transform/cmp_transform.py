@@ -101,6 +101,14 @@ def vuface2xyz_face(*, vuface: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return xyz, face
 
 
+def selection(v1, v2, v3, v4, v5):
+    selection1 = np.logical_and(v1, v2)
+    selection2 = np.logical_and(selection1, v3)
+    selection3 = np.logical_and(selection2, v4)
+    selection4 = np.logical_and(selection3, v5)
+    return selection4
+
+
 def xyz2vuface(*, xyz: np.ndarray) -> np.ndarray:
     """
 
@@ -110,13 +118,6 @@ def xyz2vuface(*, xyz: np.ndarray) -> np.ndarray:
 
     vuface = np.zeros(xyz.shape)
     abs_xyz = np.abs(xyz)
-
-    def selection(v1, v2, v3, v4, v5):
-        selection1 = np.logical_and(v1, v2)
-        selection2 = np.logical_and(selection1, v3)
-        selection3 = np.logical_and(selection2, v4)
-        selection4 = np.logical_and(selection3, v5)
-        return selection4
 
     face0 = selection(-xyz[0] >= -xyz[2], -xyz[0] > xyz[2], -xyz[0] >= -xyz[1], -xyz[0] > xyz[1], xyz[0] < 0)
     vuface[2][face0] = 0
