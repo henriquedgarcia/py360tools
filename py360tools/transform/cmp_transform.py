@@ -115,39 +115,57 @@ def xyz2vuface(*, xyz: np.ndarray) -> np.ndarray:
     :param xyz: (3, H, W)
     :return:
     """
+    x = xyz[0]
+    y = xyz[1]
+    z = xyz[2]
+
+    mx = -x
+    my = -y
+    mz = -z
+
+    face0 = selection(mx >= mz, mx > z, mx >= my, mx > y, x < 0)
+    face1 = selection(z >= mx, z > x, z >= my, z > y, z > 0)
+    face2 = selection(x >= z, x > mz, x >= my, x > y, x > 0)
+    face3 = selection(y >= x, y > mx, y >= mz, y > z, y > 0)
+    face4 = selection(mz >= x, mz > mx, mz >= my, mz > y, z < 0)
+    face5 = selection(my >= x, my > mx, my >= z, my > mz, y < 0)
+
+    abs_xyz = np.abs(xyz)
+    abs_x = abs_xyz[0]
+    abs_y = abs_xyz[1]
+    abs_z = abs_xyz[2]
 
     vuface = np.zeros(xyz.shape)
-    abs_xyz = np.abs(xyz)
+    x_ay = x / abs_y
+    x_az = x / abs_z
+    y_ax = y / abs_x
+    y_az = y / abs_z
+    z_ax = z / abs_x
+    z_ay = z / abs_y
 
-    face0 = selection(-xyz[0] >= -xyz[2], -xyz[0] > xyz[2], -xyz[0] >= -xyz[1], -xyz[0] > xyz[1], xyz[0] < 0)
+    vuface[0][face0] = y_ax[face0]
+    vuface[1][face0] = z[face0] / abs_x[face0]
     vuface[2][face0] = 0
-    vuface[1][face0] = xyz[2][face0] / abs_xyz[0][face0]
-    vuface[0][face0] = xyz[1][face0] / abs_xyz[0][face0]
 
-    face1 = selection(xyz[2] >= -xyz[0], xyz[2] > xyz[0], xyz[2] >= -xyz[1], xyz[2] > xyz[1], xyz[2] > 0)
+    vuface[0][face1] = y[face1] / abs_z[face1]
+    vuface[1][face1] = x[face1] / abs_z[face1]
     vuface[2][face1] = 1
-    vuface[1][face1] = xyz[0][face1] / abs_xyz[2][face1]
-    vuface[0][face1] = xyz[1][face1] / abs_xyz[2][face1]
 
-    face2 = selection(xyz[0] >= xyz[2], xyz[0] > -xyz[2], xyz[0] >= -xyz[1], xyz[0] > xyz[1], xyz[0] > 0)
+    vuface[0][face2] = y[face2] / abs_x[face2]
+    vuface[1][face2] = mz[face2] / abs_x[face2]
     vuface[2][face2] = 2
-    vuface[1][face2] = -xyz[2][face2] / abs_xyz[0][face2]
-    vuface[0][face2] = xyz[1][face2] / abs_xyz[0][face2]
 
-    face3 = selection(xyz[1] >= xyz[0], xyz[1] > -xyz[0], xyz[1] >= -xyz[2], xyz[1] > xyz[2], xyz[1] > 0)
+    vuface[0][face3] = z[face3] / abs_y[face3]
+    vuface[1][face3] = mx[face3] / abs_y[face3]
     vuface[2][face3] = 3
-    vuface[1][face3] = -xyz[0][face3] / abs_xyz[1][face3]
-    vuface[0][face3] = xyz[2][face3] / abs_xyz[1][face3]
 
-    face4 = selection(-xyz[2] >= xyz[0], -xyz[2] > -xyz[0], -xyz[2] >= -xyz[1], -xyz[2] > xyz[1], xyz[2] < 0)
+    vuface[0][face4] = y[face4] / abs_z[face4]
+    vuface[1][face4] = mx[face4] / abs_z[face4]
     vuface[2][face4] = 4
-    vuface[1][face4] = -xyz[0][face4] / abs_xyz[2][face4]
-    vuface[0][face4] = xyz[1][face4] / abs_xyz[2][face4]
 
-    face5 = selection(-xyz[1] >= xyz[0], -xyz[1] > -xyz[0], -xyz[1] >= xyz[2], -xyz[1] > -xyz[2], xyz[1] < 0)
+    vuface[0][face5] = mz[face5] / abs_y[face5]
+    vuface[1][face5] = mx[face5] / abs_y[face5]
     vuface[2][face5] = 5
-    vuface[1][face5] = -xyz[0][face5] / abs_xyz[1][face5]
-    vuface[0][face5] = -xyz[2][face5] / abs_xyz[1][face5]
 
     return vuface
 
