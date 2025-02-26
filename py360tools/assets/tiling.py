@@ -26,10 +26,7 @@ class Tiling:
         self.shape = np.array(splitx(tiling)[::-1])
         self.ntiles = self.shape[0] * self.shape[1]
         self.tile_shape = (self.projection.canvas.shape / self.shape).astype(int)
-
-    @LazyProperty
-    def tile_list(self):
-        return [Tile(tile_id, self) for tile_id in range(self.ntiles)]
+        self.tile_list = [Tile(tile_id, self) for tile_id in range(self.ntiles)]
 
     def __str__(self):
         return self.tiling
