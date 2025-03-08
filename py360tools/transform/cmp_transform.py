@@ -136,14 +136,8 @@ def xyz2vuface(*, xyz: np.ndarray) -> np.ndarray:
     abs_z = abs_xyz[2]
 
     vuface = np.zeros(xyz.shape)
-    x_ay = x / abs_y
-    x_az = x / abs_z
-    y_ax = y / abs_x
-    y_az = y / abs_z
-    z_ax = z / abs_x
-    z_ay = z / abs_y
 
-    vuface[0][face0] = y_ax[face0]
+    vuface[0][face0] = y[face0] / abs_x[face0]
     vuface[1][face0] = z[face0] / abs_x[face0]
     vuface[2][face0] = 0
 
