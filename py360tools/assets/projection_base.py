@@ -74,7 +74,7 @@ class ProjectionBase(ABC):
 
     def extract_viewport(self, frame_array, yaw_pitch_roll=None):
         if yaw_pitch_roll is not None:
-            self.viewport.yaw_pitch_roll = yaw_pitch_roll
+            self.yaw_pitch_roll = yaw_pitch_roll
         return extract_viewport(self, self.viewport, frame_array)
 
     def get_vptiles(self, yaw_pitch_roll=None):
