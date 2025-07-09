@@ -71,6 +71,45 @@ class Viewport:
         vptiles = get_vptiles(self.projection, self)
         return vptiles
 
+    def draw_all_tiles_borders(self, lum=255):
+        """
+        Draw all borders of all tiles in the canvas.
+        :param lum: 
+        :return: 
+        """
+        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
+        for tile in self.projection.tiling.tile_list:
+            canvas = canvas + self.draw_tile_border(idx=int(tile), lum=lum)
+        return canvas
+
+    def draw_tile_border(self, idx: int, lum=255) -> np.ndarray:
+        """
+        Draw the borders of a tile in the canvas.
+        :param idx:
+        :param lum:
+        :return:
+        """
+        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
+        canvas[self.projection.tiling.tile_list[idx].borders_nm[0], self.projection.tiling.tile_list[idx].borders_nm[1]] = lum
+        return canvas
+
+    def draw_vp_mask(self, lum=255) -> np.ndarray:
+        """
+        Project the sphere using ERP. Where is Viewport the
+        :param lum: value to draw line
+        :return: a numpy.ndarray with one deep color
+        """
+        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
+        belong = self.is_viewport(self.projection.xyz)
+        canvas[belong] = lum
+        return canvas
+
+    def draw(self):
+        draw_all_tiles_borders = self.draw_all_tiles_borders()
+        draw_vp_mask = self.draw_vp_mask()
+
+        return draw_all_tiles_borders
+
     def is_viewport(self, x_y_z):
         """
         Check if the plane equation is true to viewport
