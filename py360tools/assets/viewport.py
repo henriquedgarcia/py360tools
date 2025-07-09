@@ -45,7 +45,7 @@ class Viewport:
         :return:
         :type:
         """
-        if self.projection is not None:
+        if self.projection is None:
             raise ProjectionError('Projection is not defined.')
 
         nm_coord = projection.xyz2nm(self.xyz)
@@ -62,7 +62,7 @@ class Viewport:
         :return: Return a list with all the tiles used in the viewport.
         :rtype: list[Tile]
         """
-        if self.projection is not None:
+        if self.projection is None:
             raise ProjectionError('Projection is not defined.')
 
         if yaw_pitch_roll is not None:
