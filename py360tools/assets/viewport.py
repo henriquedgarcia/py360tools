@@ -35,11 +35,9 @@ class Viewport:
         self._yaw_pitch_roll = np.array([0., 0., 0.])
         self.projection = projection
 
-    def extract_viewport(self, projection, frame_array):
+    def extract_viewport(self, frame_array, yaw_pitch_roll=None) -> np.ndarray:
         """
 
-        :param projection:
-        :type projection: 'ProjectionBase'
         :param frame_array:
         :type frame_array: np.ndarray
         :return:
@@ -47,8 +45,8 @@ class Viewport:
         """
         if self.projection is None:
             raise ProjectionError('Projection is not defined.')
-
-        nm_coord = projection.xyz2nm(self.xyz)
+        self.yaw_pitch_roll=yaw_pitch_roll
+        nm_coord = self.projection.xyz2nm(self.xyz)
         nm_coord = nm_coord.transpose((1, 2, 0))
         vp_img = cv2.remap(frame_array, map1=nm_coord[..., 1:2].astype(np.float32),
                            map2=nm_coord[..., 0:1].astype(np.float32), interpolation=cv2.INTER_LINEAR,
