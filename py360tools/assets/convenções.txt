@@ -1,5 +1,3 @@
-espaçamento 4 espaços
+Espaçamento 4 espaços
 120 colunas
-tipagem no docstring
-docstring in reStructuredText (gerar documentação usando Sphinx)
-
+Tipagem no docstring em reStructuredText (gerar documentação usando Sphinx)
