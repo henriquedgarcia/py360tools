@@ -39,20 +39,26 @@ def get_borders_value(*,
     return np.unique(borders_value, axis=1)
 
 
-def get_borders_coord_nm(*, position, shape):
+def get_borders_coord_nm(position, shape):
     """
+    Calculate the coordinates of the borders of a rectangular area. The function generates
+    arrays representing the top, bottom, left, and right borders (in Cartesian coordinates)
+    of a rectangle defined by its top-left position and shape dimensions. The resulting
+    coordinates are concatenated into a single array.
 
-    :param position: (x, y)
+    :param position: Coordinates of the top-left corner of the rectangle (x, y).
     :type position: list | tuple | np.ndarray
-    :param shape: (H, W)
+    :param shape: Dimensions of the rectangle (height, width).
     :type shape: list | tuple | np.ndarray
-    :return: shape==(C, thickness*(2N+2M))
+    :return: Concatenated Cartesian coordinates of the boundaries of the rectangle.
+             The shape of the result is (2, total numbers of boundary points).
     :rtype: np.ndarray
     """
-    x1 = position[0]
-    x2 = position[0] + shape[1]
-    y1 = position[1]
-    y2 = position[1] + shape[0]
+
+    x1 = position[1]
+    x2 = position[1] + shape[1]
+    y1 = position[0]
+    y2 = position[0] + shape[0]
 
     top_border = np.array(np.mgrid[y1:y1 + 1, x1:x2]).reshape(2, -1)
     bottom_border = np.array(np.mgrid[y2 - 1:y2, x1:x2]).reshape(2, -1)
