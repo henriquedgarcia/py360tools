@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 import py360tools.draw as draw
-from py360tools.assets import ERP
+from py360tools import Viewport, ERP
 from py360tools.utils import load_test_data
 
 __FILENAME__ = Path(__file__).absolute()
@@ -23,7 +23,8 @@ class TestErpDrawMethods(unittest.TestCase):
         # cmp '144x96', '288x192','432x288','576x384'
         height, width = 288, 576
 
-        cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}', vp_res='440x360', fov_res='110x90')
+        cls.projection = ERP(tiling='6x4', proj_res=f'{width}x{height}')
+        cls.viewport = Viewport('440x360', '110x90', cls.projection)
         cls.projection.yaw_pitch_roll = np.deg2rad((0, 0, 0))
 
         # Open Image
@@ -33,7 +34,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_draw_all_tiles_borders(self):
         draw_all_tiles_borders_test_file = Path(f'{__ASSETS__}/draw_all_tiles_borders_test_file.pickle')
-        draw_all_tiles_borders = draw.draw_all_tiles_borders(projection=self.projection)
+        draw_all_tiles_borders = draw.draw_all_tiles_borders(viewport=self.viewport)
 
         draw_all_tiles_borders_test = load_test_data(draw_all_tiles_borders_test_file,
                                                      draw_all_tiles_borders)
@@ -42,7 +43,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_draw_vp_borders(self):
         draw_vp_borders_test_file = Path(f'{__ASSETS__}/draw_vp_borders_test_file.pickle')
-        draw_vp_borders = draw.draw_vp_borders(projection=self.projection)
+        draw_vp_borders = draw.draw_vp_borders(viewport=self.viewport)
 
         draw_vp_borders_test = load_test_data(draw_vp_borders_test_file,
                                               draw_vp_borders)
@@ -51,7 +52,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_draw_vp_mask(self):
         draw_vp_mask_test_file = Path(f'{__ASSETS__}/draw_vp_mask_test_file.pickle')
-        draw_vp_mask = draw.draw_vp_mask(projection=self.projection)
+        draw_vp_mask = draw.draw_vp_mask(viewport=self.viewport)
 
         draw_vp_mask_test = load_test_data(draw_vp_mask_test_file,
                                            draw_vp_mask)
@@ -60,7 +61,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_draw_vp_tiles(self):
         draw_vp_tiles_test_file = Path(f'{__ASSETS__}/draw_vp_tiles_test_file.pickle')
-        draw_vp_tiles = draw.draw_vp_tiles(projection=self.projection)
+        draw_vp_tiles = draw.draw_vp_tiles(viewport=self.viewport)
         draw_vp_tiles_test = load_test_data(draw_vp_tiles_test_file,
                                             draw_vp_tiles)
         # draw.show(draw_vp_tiles)
@@ -68,7 +69,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_get_viewport_image(self):
         get_viewport_image_test_file = Path(f'{__ASSETS__}/get_viewport_image_test_file.pickle')
-        get_viewport_image = self.projection.extract_viewport(self.frame_array)
+        get_viewport_image = self.viewport.extract_viewport(self.frame_array)
         get_viewport_image_test = load_test_data(get_viewport_image_test_file,
                                                  get_viewport_image)
         # draw.show(get_viewport_image)
@@ -76,7 +77,7 @@ class TestErpDrawMethods(unittest.TestCase):
 
     def test_get_vptiles(self):
         get_vptiles_test_file = Path(f'{__ASSETS__}/get_vptiles_test_file.pickle')
-        get_vptiles = list(map(int, self.projection.get_vptiles()))
+        get_vptiles = list(map(int, self.viewport.get_vptiles()))
         get_vptiles_test = load_test_data(get_vptiles_test_file,
                                           get_vptiles)
         # print(get_vptiles)
