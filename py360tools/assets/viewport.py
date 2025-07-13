@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 import py360tools.transform
+from py360tools import ProjectionBase
 from py360tools.transform.transform import get_vptiles
 from py360tools.utils import splitx
 
@@ -14,7 +15,7 @@ class Viewport:
     fov: np.ndarray
     vp_shape: np.ndarray
 
-    def __init__(self, resolution, fov, projection=None):
+    def __init__(self, resolution, fov, projection: ProjectionBase = None):
         """
         Viewport Class used to extract view pixels in projections.
         The vp is an image as numpy-array with shape (H, M, 3).
@@ -37,15 +38,26 @@ class Viewport:
 
     def extract_viewport(self, frame_array, yaw_pitch_roll=None) -> np.ndarray:
         """
+        Extracts a viewport image based on the input frame and yaw-pitch-roll orientation.
 
-        :param frame_array:
+        This method uses projection data to transform the input frame into a new viewport
+        image based on spherical coordinates determined by yaw, pitch, and roll. The extraction
+        process involves mapping frame data onto a spherical projection.
+
+        :param frame_array: The input 2D or 3D frame data representing the image or video frame
+            to be transformed into a viewport.
         :type frame_array: np.ndarray
-        :return:
-        :type:
+        :param yaw_pitch_roll: The yaw, pitch, and roll values representing the orientation for
+            viewport transformation, or None for default/default existing orientation.
+        :type yaw_pitch_roll: Optional[Tuple[float, float, float]]
+        :return: A transformed viewport image mapped according to the specified orientation.
+        :rtype: np.ndarray
+        :raises ProjectionError: If the projection object is not defined or uninitialized.
         """
+
         if self.projection is None:
             raise ProjectionError('Projection is not defined.')
-        self.yaw_pitch_roll=yaw_pitch_roll
+        self.yaw_pitch_roll = yaw_pitch_roll if yaw_pitch_roll is not None else self.yaw_pitch_roll
         nm_coord = self.projection.xyz2nm(self.xyz)
         nm_coord = nm_coord.transpose((1, 2, 0))
         vp_img = cv2.remap(frame_array, map1=nm_coord[..., 1:2].astype(np.float32),
@@ -56,10 +68,20 @@ class Viewport:
 
     def get_vptiles(self, yaw_pitch_roll=None):
         """
+        Get the tiles used in the viewport.
 
-        :return: Return a list with all the tiles used in the viewport.
+        This method calculates and returns a list of tiles that are used in the
+        viewport based on the specified projection and optionally updates the
+        yaw, pitch, and roll of the viewport.
+
+        :param yaw_pitch_roll: Optional yaw, pitch, and roll values to update the
+            viewport's orientation.
+        :type yaw_pitch_roll: Tuple[float, float, float] or None
+        :return: List of tiles showed in the viewport.
         :rtype: list[Tile]
+        :raises ProjectionError: If the projection is not defined.
         """
+
         if self.projection is None:
             raise ProjectionError('Projection is not defined.')
 
@@ -75,8 +97,8 @@ class Viewport:
         :param lum: 
         :return: 
         """
-        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
-        for tile in self.projection.tiling.tile_list:
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
+        for tile in self.projection.tile_list:
             canvas = canvas + self.draw_tile_border(idx=int(tile), lum=lum)
         return canvas
 
@@ -87,8 +109,8 @@ class Viewport:
         :param lum:
         :return:
         """
-        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
-        canvas[self.projection.tiling.tile_list[idx].borders_nm[0], self.projection.tiling.tile_list[idx].borders_nm[1]] = lum
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
+        canvas[self.projection.tile_borders_nm[idx][0], self.projection.tile_borders_nm[idx][1]] = lum
         return canvas
 
     def draw_vp_mask(self, lum=255) -> np.ndarray:
@@ -97,7 +119,7 @@ class Viewport:
         :param lum: value to draw line
         :return: a numpy.ndarray with one deep color
         """
-        canvas = np.zeros(self.projection.canvas.shape, dtype='uint8')
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
         belong = self.is_viewport(self.projection.xyz)
         canvas[belong] = lum
         return canvas
@@ -110,16 +132,16 @@ class Viewport:
 
     def is_viewport(self, x_y_z):
         """
-        Check if the plane equation is true to viewport
-        x1 * m + y1 * n + z1 * z < 0
-        If True, the "point" is on the viewport
-        Obs: belong only returns true if all expressions are true
+        Verify if the given set of 3D points is within the viewport defined
+        by a plane equation in the format of `x1 * m + y1 * n + z1 * z < 0`.
+        This method checks whether all points satisfy the plane equation, thereby
+        determining if they belong solely to the viewport.
 
-        :param x_y_z: A 3D Point list in the space [(x, y, z), ...].T, shape == (3, ...)
+        :param x_y_z: A 3D point array in the shape of (3, ...), where each column
+            corresponds to a point in the space [(x, y, z), ...].T.
         :type x_y_z: np.ndarray
-        :return: A boolean.
-        :rtype: Bool
-
+        :return: A boolean indicating whether all given points belong to the viewport.
+        :rtype: bool
         """
         inner_prod = np.tensordot(self.normals.T, x_y_z, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
