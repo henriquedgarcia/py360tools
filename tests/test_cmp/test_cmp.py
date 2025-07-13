@@ -5,8 +5,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from py360tools.assets import CMP
-from py360tools.draw import show
+from py360tools import CMP, Viewport, show
 from py360tools.utils import load_test_data
 
 show = show
@@ -31,10 +30,9 @@ class TestCmp(unittest.TestCase):
         # cmp '144x96', '288x192','432x288','576x384'
         height, width = 384, 576
 
-        cls.projection = CMP(tiling='6x4', proj_res=f'{width}x{height}',
-                             vp_res='440x360',
-                             fov_res='110x90')
-        cls.projection.yaw_pitch_roll = np.deg2rad((0, 0, -0))
+        cls.projection = CMP(tiling='6x4', proj_res=f'{width}x{height}')
+        cls.viewport = Viewport('440x360', '110x90', cls.projection)
+        cls.viewport.yaw_pitch_roll = np.deg2rad((0, 0, 0))
 
         frame_img: Image = Image.open('images/cmp1.png')
         frame_img = frame_img.resize((width, height))
@@ -42,8 +40,8 @@ class TestCmp(unittest.TestCase):
 
         # Load expected values
         cls.xyz_test_data = load_test_data(xyz_file, cls.projection.xyz)
-        cls.vp_img_test_data = load_test_data(vp_img_file, cls.projection.extract_viewport(cls.frame_array))
-        cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.projection.get_vptiles())))
+        cls.vp_img_test_data = load_test_data(vp_img_file, cls.viewport.extract_viewport(cls.frame_array))
+        cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.viewport.get_vptiles())))
 
     def test_nm2xyz(self):
         xyz = self.projection.nm2xyz(self.projection.nm)
@@ -54,12 +52,12 @@ class TestCmp(unittest.TestCase):
         self.assertTrue(np.array_equal(nm, self.projection.nm))
 
     def test_extract_viewport(self):
-        vp_img = self.projection.extract_viewport(self.frame_array)
+        vp_img = self.viewport.extract_viewport(self.frame_array)
         # show(vp_img)
         self.assertTrue(np.array_equal(vp_img, self.vp_img_test_data))
 
     def test_get_vptiles(self):
-        get_vptiles = list(map(int, self.projection.get_vptiles()))
+        get_vptiles = list(self.viewport.get_vptiles())
         # print(get_vptiles)
         self.assertTrue(np.array_equal(self.vptiles_test_data, get_vptiles))
 
