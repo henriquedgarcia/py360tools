@@ -84,5 +84,5 @@ def get_vptiles(projection, viewport):
     for tile in projection.tiling.tile_list:
         borders_xyz = projection.nm2xyz(tile.borders_nm)
         if np.any(viewport.is_viewport(borders_xyz)):
-            vptiles.append(tile)
+            vptiles.append(int(tile))
     return vptiles
