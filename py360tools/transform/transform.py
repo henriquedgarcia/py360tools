@@ -7,7 +7,7 @@ from py360tools.assets.matrot import MatRot
 
 def ea2xyz(*, ea: np.ndarray) -> np.ndarray:
     """
-    Convert from horizontal coordinate system  in radians to cartesian system.
+    Convert from a horizontal coordinate system in radians to a cartesian system.
     ISO/IEC JTC1/SC29/WG11/N17197l: Algorithm descriptions of projection format conversion and video quality metrics in
     360Lib Version 5
     :param np.ndarray ea: In Rad. Shape == (2, ...)
@@ -23,10 +23,10 @@ def ea2xyz(*, ea: np.ndarray) -> np.ndarray:
 
 def xyz2ea(*, xyz):
     """
-    Convert from cartesian system to horizontal coordinate system in radians
+    Convert from a cartesian system to a horizontal coordinate system in radians
     :param xyz: shape = (3, ...)
     :type xyz: np.ndarray
-    :return: np.ndarray([azimuth, elevation]) - in rad. shape = (2, ...)
+    :return: np.ndarray([azimuth, elevation]) - in rad. Shape = (2, ...)
     :rtype: np.ndarray
     """
     ea = np.zeros((2,) + xyz.shape[1:])
@@ -49,12 +49,13 @@ def position2displacement(df_positions):
     The two columns of the dataframe will be converted into a numpy array.
 
     :param df_positions: Contains the position of the center of the viewport.
-    :type df_positions: pd.DataFrame
+    :type df_positions: Pd.DataFrame
     :return : the displacement of the center of viewport by frame in radians
     :rtype: pd.DataFrame
     """
 
     # convert to numpy
+    # noinspection PyTypeChecker
     positions = np.array(df_positions[['yaw', 'pitch']])
     pos = ea2xyz(ea=positions.T).T
 
@@ -78,11 +79,10 @@ def get_vptiles(projection, viewport):
     :return:
     :rtype: list[Tile]
     """
-    if str(projection.tiling) == '1x1': return [tile for tile in projection.tiling.tile_list]
+    if str(projection.tiling) == '1x1': return [0]
 
     vptiles = []
-    for tile in projection.tiling.tile_list:
-        borders_xyz = projection.nm2xyz(tile.borders_nm)
-        if np.any(viewport.is_viewport(borders_xyz)):
-            vptiles.append(int(tile))
+    for tile in projection.tile_list.values():
+        if np.any(viewport.is_viewport(tile.borders_xyz)):
+            vptiles.append(tile.idx)
     return vptiles
