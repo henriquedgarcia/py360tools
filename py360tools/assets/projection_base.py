@@ -36,7 +36,7 @@ class ProjectionBase(ABC):
         self.tiling: str = tiling
         self.tiling_shape = np.array(splitx(self.tiling)[::-1], dtype=int)
         self.n_tile = self.tiling_shape.prod()
-        self.tile_shape = self.shape / self.tiling_shape
+        self.tile_shape = self.shape // self.tiling_shape
         self.tile_list: dict[int, Tile] = {}
         self.make_tiles()
 
