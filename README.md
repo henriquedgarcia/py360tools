@@ -1,8 +1,9 @@
 from py360tools import Viewportfrom py360tools import Viewportfrom py360tools import Viewport
 
 # video360utils
-Utilitários para transformações em vídeo 360. As projeções são subclasses de `py360tools.assets.projection_base.ProjectionBase`
 
+Utilitários para transformações em vídeo 360. As projeções são subclasses de
+`py360tools.assets.projection_base.ProjectionBase`
 
 ```python
 class Viewport:
@@ -11,37 +12,39 @@ class Viewport:
 ```
 
 **Parameters**
+
 - `resolution`: _str_ <br>
-&nbsp;&nbsp;&nbsp;&nbsp; A string representing the viewport resolution, e.g., 
-'600x3000'.
+  &nbsp;&nbsp;&nbsp;&nbsp; A string representing the viewport resolution, e.g.,
+  '600x3000'.
 - `fov`: _str_ <br>
-&nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g., 
-'100x90'.
+  &nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g.,
+  '100x90'.
 - `projection`: _ProjectionBase_ <br>
-&nbsp;&nbsp;&nbsp;&nbsp; [Optional] A object representation the projection, 
-e.g., ERP, CMP.
+  &nbsp;&nbsp;&nbsp;&nbsp; [Optional] A object representation the projection,
+  e.g., ERP, CMP.
 
 **Methods**
-- `extract_viewport(frame_array, yaw_pitch_roll=None) -> np.ndarray`: shape==(2,...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp; Extracts a viewport image based on the input frame and 
-yaw-pitch-roll orientation.
-- `get_vptiles(yaw_pitch_roll=None) -> list[int]`: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; Get the tiles used in the viewport.
-- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
-- `get_vp_mask(lum=255) -> bool`: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
-- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
-- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
-&nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
- 
-**Attributes**
-- `yaw_pitch_roll`: np.ndarray<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; Coordinates in the projection plane with shape==(2, ...).
-- `xyz`: np.ndarray<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; Coordinates on the 3d cartesian space with shape==(3, ...) 
 
+- `extract_viewport(frame_array, yaw_pitch_roll=None) -> np.ndarray`: shape==(2,...)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Extracts a viewport image based on the input frame and
+  yaw-pitch-roll orientation.
+- `get_vptiles(yaw_pitch_roll=None) -> list[int]`: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Get the tiles used in the viewport.
+- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
+- `get_vp_mask(lum=255) -> bool`: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
+- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
+- `is_viewport(yaw_pitch_roll=None) -> bool`: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Verify if the given set of 3D points is within the viewport
+
+**Attributes**
+
+- `yaw_pitch_roll`: np.ndarray<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Coordinates in the projection plane with shape==(2, ...).
+- `xyz`: np.ndarray<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Coordinates on the 3d cartesian space with shape==(3, ...)
 
 ```python
 class ProjectionBase:
@@ -50,25 +53,28 @@ class ProjectionBase:
 ```
 
 **Parameters**
+
 - `proj_res`: _str_ <br>
-&nbsp;&nbsp;&nbsp;&nbsp; A string representing the projection resolution, e.g., '600x3000'.
+  &nbsp;&nbsp;&nbsp;&nbsp; A string representing the projection resolution, e.g., '600x3000'.
 - `fov`: _str_ <br>
-&nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g., '100x90'.
+  &nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g., '100x90'.
 
 **Methods**
+
 - `xyz2nm(xyz) -> np.ndarray`: xyz.shape==(3,...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp; projects any point in space onto a projection. Returns 
-the coordinates of the projection.
+  &nbsp;&nbsp;&nbsp;&nbsp; projects any point in space onto a projection. Returns
+  the coordinates of the projection.
 - `nm2xyz(nm) -> np.ndarray`: nm.shape==(2,...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp; The projection coordinate system is the same as 
-the image. It starts at the top left and increases to the right (m) and down (n). 
-Returns the coordinates for the surface of the 3D sphere.
- 
+  &nbsp;&nbsp;&nbsp;&nbsp; The projection coordinate system is the same as
+  the image. It starts at the top left and increases to the right (m) and down (n).
+  Returns the coordinates for the surface of the 3D sphere.
+
 **Attributes**
-- `nm`: np.ndarray<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; Coordinates in the projection plane with shape==(2, ...).
-- `xyz`: np.ndarray<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; Coordinates on the 3d cartesian space with shape==(3, ...) 
+
+- `nm`: np.ndarray<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Coordinates in the projection plane with shape==(2, ...).
+- `xyz`: np.ndarray<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Coordinates on the 3d cartesian space with shape==(3, ...)
 
 ## Examples
 
@@ -151,21 +157,18 @@ Image.fromarray(vp_image).show()
 ```
 
 ## Other functions
-### ```python
-lib.util.get_borders(*, coord_nm=None, shape=None, thickness=1)
-py360tools.utils.util_transform
-```
-**Parameters**
-- `coord_nm`: ndarray <br>
-&nbsp;&nbsp;&nbsp;&nbsp; coord_nm must be a ndarray with shape==(chanel(C), height(N), width(M))
-- `shape`: 2-tuple or ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp; A alternative shape, case coord_nm is a lists. (height, width) 
-- `thickness`: int <br>
-&nbsp;&nbsp;&nbsp;&nbsp; The border thickness in pixels
 
-**Return**
-- ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp; A ndarray with shape == (C, thickness*(2N+2M))
+- ```py360tools.util.splitx(string)```
+- ```py360tools.util.unflatten_index(idx, shape)```
+- ```py360tools.util.flatten_index(position, shape)```
+- ```py360tools.util.mse2psnr(_mse, max_sample)```
+- ```py360tools.util.make_tile_positions(tiling, proj_shape)```
+- ```py360tools.util.iter_video(video_path, gray, dtype)```
+- ```py360tools.util.check_ea(ea)```
+- ```py360tools.util.get_borders_value(array, thickness)```
+- ```py360tools.util.get_borders_coord_nm(position, shape)```
+- ```py360tools.util.get_tile_borders(tile_id, tiling_shape, tile_shape)```
+- ```py360tools.util.create_nm_coords(shape)```
 
 ## Install
 - `pip install -e .`
