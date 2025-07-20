@@ -93,7 +93,7 @@ def make_tile_positions(tiling: str, proj_shape: tuple) -> dict[int, tuple[int, 
 
     tile_positions = {}
     for tile in range(tile_N * tile_M):
-        tile_m, tile_n = np.unravel_index(tile, (tile_N, tile_M))
+        tile_m, tile_n = unflatten_index(tile, (tile_N, tile_M))
         tile_y = tile_h * int(tile_n)
         tile_x = tile_w * int(tile_m)
         x_ini = tile_x
