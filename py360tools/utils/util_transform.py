@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 
 from py360tools.utils.util import unflatten_index
@@ -100,26 +99,3 @@ def get_tile_borders(tile_id, tiling_shape, tile_shape):
 def create_nm_coords(shape=(200, 300)):
     nm_test = np.mgrid[0:shape[0], 0:shape[1]]
     return nm_test
-
-
-def extract_viewport(projection, viewport, proj_img_array):
-    """
-
-    :param projection:
-    :param viewport:
-    :type viewport: Viewport
-    :param proj_img_array:
-    :type proj_img_array: np.ndarray
-    :return:
-    :type:
-    """
-
-    nm_coord = projection.xyz2nm(viewport.xyz)
-    nm_coord = nm_coord.transpose((1, 2, 0))
-    vp_img = cv2.remap(proj_img_array,
-                       map1=nm_coord[..., 1:2].astype(np.float32),
-                       map2=nm_coord[..., 0:1].astype(np.float32),
-                       interpolation=cv2.INTER_LINEAR,
-                       borderMode=cv2.BORDER_WRAP)
-    # show(vp_img)
-    return vp_img
