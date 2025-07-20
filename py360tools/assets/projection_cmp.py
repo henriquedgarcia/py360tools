@@ -39,10 +39,10 @@ class CMP(ProjectionBase):
     @staticmethod
     def ea2nm_face(*, ea: np.ndarray, proj_shape: tuple = None) -> tuple[np.ndarray, np.ndarray]:
         """
-        The face must be a square. proj_shape must have 3:2 ratio
+        The face must be square. proj_shape must have 3:2 ratio
         :param ea: in rad
         :param proj_shape: shape of projection in numpy format: (height, width)
-        :return: (nm, face) pixel coord using nearest neighbor
+        :return: (nm, face) pixel coord using the nearest neighbor
         """
         xyz = ea2xyz(ea=ea)
         nm, face = CMP.xyz2nm_face(xyz=xyz, proj_shape=proj_shape)
@@ -58,7 +58,7 @@ class CMP(ProjectionBase):
         is adjusted relative to that face. The cube faces are indexed as integers from 0 to 5, where the mapping
         takes into account the aspect ratio and dimensions of the cube face in relation to the projection shape.
 
-        :param nm: Pixel coordinates in image projection in the shape of (2, ...), where the first dimension
+        :param nm: Pixel coordinates in the image projection in the shape of (2, ...), where the first dimension
                    corresponds to the height (n) and width (m) of the image.
         :type nm: np.ndarray
         :param proj_shape: A tuple representing the projection's dimensions. It can either be a 2D shape
