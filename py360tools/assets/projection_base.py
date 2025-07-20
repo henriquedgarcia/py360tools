@@ -7,6 +7,7 @@ import numpy as np
 
 from py360tools.utils.util_transform import create_nm_coords, get_borders_coord_nm
 from ..utils import splitx
+from ..utils.util import unflatten_index
 
 
 @dataclass
@@ -43,7 +44,7 @@ class ProjectionBase(ABC):
     def make_tile_list(self):
         tile_list: dict[int, Tile] = {}
         for tile in range(self.n_tile):
-            tile_position_tiling = np.unravel_index(tile, self.tiling_shape)
+            tile_position_tiling = unflatten_index(tile, self.tiling_shape)[::-1]
             tile_position_nm = (tile_position_tiling * self.tile_shape).astype(int)
             tile_borders_nm = get_borders_coord_nm(tile_position_nm, self.tile_shape).astype(int)
             tile_borders_xyz = self.nm2xyz(tile_borders_nm)
