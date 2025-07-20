@@ -168,6 +168,14 @@ Image.fromarray(vp_image).show()
 - ```py360tools.util.get_tile_borders(tile_id, tiling_shape, tile_shape)```
 - ```py360tools.util.create_nm_coords(shape)```
 
+## Depends
+
+- `pillow`
+- `numpy`
+- `pandas`
+- `opencv-python`
+
 ## Install
+
 - `pip install -e .`
 
