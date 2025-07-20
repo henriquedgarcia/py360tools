@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-import py360tools.draw as draw
 from py360tools import Viewport, CMP
 from py360tools.utils import load_test_data
 
@@ -36,7 +35,7 @@ class TestCmpDrawMethods(unittest.TestCase):
 
     def test_draw_all_tiles_borders(self):
         draw_all_tiles_borders_test_file = __ASSETS__ / 'draw_all_tiles_borders_test_file.pickle'
-        canvas = draw.draw_all_tiles_borders(viewport=self.viewport)
+        canvas = self.projection.draw_all_tiles_borders()
         draw_all_tiles_borders_test = load_test_data(draw_all_tiles_borders_test_file,
                                                      canvas)
         # draw.show(canvas)
@@ -44,21 +43,21 @@ class TestCmpDrawMethods(unittest.TestCase):
 
     def test_draw_vp_borders(self):
         draw_vp_borders_test_file = Path(f'{__ASSETS__}/draw_vp_borders_test_file.pickle')
-        canvas = draw.draw_vp_borders(viewport=self.viewport)
+        canvas = self.viewport.get_vp_borders()
         draw_vp_borders_test = load_test_data(draw_vp_borders_test_file, canvas)
         # draw.show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_borders_test))
 
     def test_draw_vp_mask(self):
         draw_vp_mask_test_file = Path(f'{__ASSETS__}/draw_vp_mask_test_file.pickle')
-        canvas = draw.draw_vp_mask(viewport=self.viewport)
+        canvas = self.viewport.get_vp_mask()
         draw_vp_mask_test = load_test_data(draw_vp_mask_test_file, canvas)
         # draw.show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_mask_test))
 
     def test_draw_vp_tiles(self):
         draw_vp_tiles_test_file = Path(f'{__ASSETS__}/draw_vp_tiles_test_file.pickle')
-        canvas = draw.draw_vp_tiles(viewport=self.viewport)
+        canvas = self.viewport.get_vp_tiles()
         draw_vp_tiles_test = load_test_data(draw_vp_tiles_test_file,
                                             canvas)
         # draw.show(canvas)
