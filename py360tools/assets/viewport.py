@@ -66,7 +66,7 @@ class Viewport:
         # show(vp_img)
         return vp_img
 
-    def get_vptiles(self, yaw_pitch_roll=None):
+    def get_vptiles(self, yaw_pitch_roll=None)-> list:
         """
         Get the tiles used in the viewport.
 
@@ -91,29 +91,7 @@ class Viewport:
         vptiles = get_vptiles(self.projection, self)
         return vptiles
 
-    def draw_all_tiles_borders(self, lum=255):
-        """
-        Draw all borders of all tiles in the canvas.
-        :param lum: 
-        :return: 
-        """
-        canvas = np.zeros(self.projection.shape, dtype='uint8')
-        for tile in self.projection.tile_list:
-            canvas = canvas + self.draw_tile_border(idx=int(tile), lum=lum)
-        return canvas
-
-    def draw_tile_border(self, idx: int, lum=255) -> np.ndarray:
-        """
-        Draw the borders of a tile in the canvas.
-        :param idx:
-        :param lum:
-        :return:
-        """
-        canvas = np.zeros(self.projection.shape, dtype='uint8')
-        canvas[self.projection.tile_borders_nm[idx][0], self.projection.tile_borders_nm[idx][1]] = lum
-        return canvas
-
-    def draw_vp_mask(self, lum=255) -> np.ndarray:
+    def get_vp_mask(self, lum=255) -> np.ndarray:
         """
         Project the sphere using ERP. Where is Viewport the
         :param lum: value to draw line
@@ -125,8 +103,8 @@ class Viewport:
         return canvas
 
     def draw(self):
-        draw_all_tiles_borders = self.draw_all_tiles_borders()
-        draw_vp_mask = self.draw_vp_mask()
+        draw_all_tiles_borders = self.projection.draw_all_tiles_borders()
+        draw_vp_mask = self.get_vp_mask()
 
         return draw_all_tiles_borders
 
