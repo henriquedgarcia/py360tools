@@ -8,7 +8,7 @@ from py360tools import ProjectionBase
 from py360tools.assets.projection_base import Tile
 from py360tools.transform.transform import get_vptiles
 from py360tools.utils import splitx
-from py360tools.utils.util_transform import get_borders_value
+from py360tools.utils.util import get_borders_value
 
 
 class ProjectionError(Exception):
