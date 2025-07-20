@@ -1,5 +1,3 @@
-from py360tools import Viewportfrom py360tools import Viewportfrom py360tools import Viewport
-
 # py360tools
 
 Utilitários para transformações em vídeo 360. As projeções são subclasses de
