@@ -71,7 +71,7 @@ def rotate(xyz, yaw_pitch_roll):
     return np.tensordot(matrix, xyz, axes=1)
 
 
-def get_vptiles(projection, viewport):
+def get_vptiles(projection, viewport) -> list:
     """
 
     :param projection:
