@@ -1,6 +1,6 @@
 from py360tools import Viewportfrom py360tools import Viewportfrom py360tools import Viewport
 
-# video360utils
+# py360tools
 
 Utilitários para transformações em vídeo 360. As projeções são subclasses de
 `py360tools.assets.projection_base.ProjectionBase`
