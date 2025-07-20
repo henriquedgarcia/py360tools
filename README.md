@@ -151,8 +151,10 @@ Image.fromarray(vp_image).show()
 ```
 
 ## Other functions
-### ```lib.util.get_borders(*, coord_nm=None, shape=None, thickness=1)```
-
+### ```python
+lib.util.get_borders(*, coord_nm=None, shape=None, thickness=1)
+py360tools.utils.util_transform
+```
 **Parameters**
 - `coord_nm`: ndarray <br>
 &nbsp;&nbsp;&nbsp;&nbsp; coord_nm must be a ndarray with shape==(chanel(C), height(N), width(M))
@@ -167,3 +169,4 @@ Image.fromarray(vp_image).show()
 
 ## Install
 - `pip install -e .`
+

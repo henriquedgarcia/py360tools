@@ -6,7 +6,7 @@ from typing import Union
 import numpy as np
 
 from py360tools.utils.util_transform import create_nm_coords, get_borders_coord_nm
-from ..utils import splitx
+from ..utils import create_nm_coords, splitx
 from ..utils.util import unflatten_index
 
 
