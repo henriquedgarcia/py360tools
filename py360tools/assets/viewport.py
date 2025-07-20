@@ -1,10 +1,14 @@
+from functools import cached_property
+
 import cv2
 import numpy as np
 
 import py360tools.transform
 from py360tools import ProjectionBase
+from py360tools.assets.projection_base import Tile
 from py360tools.transform.transform import get_vptiles
 from py360tools.utils import splitx
+from py360tools.utils.util_transform import get_borders_value
 
 
 class ProjectionError(Exception):
@@ -31,7 +35,7 @@ class Viewport:
         self.vp_shape = np.array(splitx(resolution)[::-1])
         self.fov = np.deg2rad(np.array(splitx(fov)[::-1]))
 
-        self._normals = self._normals_default()
+        self.set_normals_default()
         self._xyz = self._xyz_default
         self._yaw_pitch_roll = np.array([0., 0., 0.])
         self.projection = projection
@@ -66,7 +70,7 @@ class Viewport:
         # show(vp_img)
         return vp_img
 
-    def get_vptiles(self, yaw_pitch_roll=None)-> list:
+    def get_vptiles(self, yaw_pitch_roll=None) -> list[Tile]:
         """
         Get the tiles used in the viewport.
 
@@ -82,31 +86,9 @@ class Viewport:
         :raises ProjectionError: If the projection is not defined.
         """
 
-        if self.projection is None:
-            raise ProjectionError('Projection is not defined.')
-
-        if yaw_pitch_roll is not None:
-            self.yaw_pitch_roll = yaw_pitch_roll
-
+        self.yaw_pitch_roll = self.yaw_pitch_roll if yaw_pitch_roll is None else yaw_pitch_roll
         vptiles = get_vptiles(self.projection, self)
         return vptiles
-
-    def get_vp_mask(self, lum=255) -> np.ndarray:
-        """
-        Project the sphere using ERP. Where is Viewport the
-        :param lum: value to draw line
-        :return: a numpy.ndarray with one deep color
-        """
-        canvas = np.zeros(self.projection.shape, dtype='uint8')
-        belong = self.is_viewport(self.projection.xyz)
-        canvas[belong] = lum
-        return canvas
-
-    def draw(self):
-        draw_all_tiles_borders = self.projection.draw_all_tiles_borders()
-        draw_vp_mask = self.get_vp_mask()
-
-        return draw_all_tiles_borders
 
     def is_viewport(self, x_y_z):
         """
@@ -119,11 +101,61 @@ class Viewport:
             corresponds to a point in the space [(x, y, z), ...].T.
         :type x_y_z: np.ndarray
         :return: A boolean indicating whether all given points belong to the viewport.
-        :rtype: bool
+        :rtype: Bool
         """
         inner_prod = np.tensordot(self.normals.T, x_y_z, axes=1)
         belong = np.all(inner_prod <= 0, axis=0)
         return belong
+
+    def get_vp_mask(self, lum=255) -> np.ndarray:
+        """
+        Project the sphere using ERP. Where is Viewport the
+        :param lum: value to draw line
+        :return: a numpy.ndarray with one deep color
+        """
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
+        belong = self.is_viewport(self.projection.xyz)
+        canvas[belong] = lum
+        return canvas
+
+    def get_vp_borders(self, thickness=1, lum=255) -> np.ndarray:
+        """
+        Draw the borders of the provided viewport using specified thickness and
+        luminance. The function projects the sphere using ERP and uses the viewport
+        attributes to determine border positions.
+
+        :type thickness: int, optional
+        :param lum: Luminance value used for drawing the borders. Defaults to 255.
+        :type lum: int, optional
+        :return: A numpy array where the specified borders are drawn with the
+                 given luminance.
+        :rtype: numpy.ndarray
+        """
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
+
+        vp_borders_xyz = get_borders_value(array=self.xyz, thickness=thickness)
+        nm = self.projection.xyz2nm(vp_borders_xyz).astype(int)
+        canvas[nm[0, ...], nm[1, ...]] = lum
+        return canvas
+
+    def get_vp_tiles(self, lum=255) -> np.ndarray:
+        """
+        Draw visual perspective (VP) tiles onto a canvas based on the provided viewport.
+
+        This function creates a new canvas matrix initialized to zero, iterates over
+        the tiles of the given viewport, and applies a function to draw the borders
+        of each tile with the specified luminance value. The result is summed into
+        the canvas and returned as a numpy array.
+
+        :param lum: Luminance value for drawing tile borders. Default is 255.
+        :type lum: int
+        :return: Numpy array representing the canvas with drawn VP tiles.
+        :rtype: numpy.ndarray
+        """
+        canvas = np.zeros(self.projection.shape, dtype='uint8')
+        for tile in self.get_vptiles():
+            canvas = canvas + self.projection.draw_tile_border(tile, lum=lum)
+        return canvas
 
     @property
     def yaw_pitch_roll(self) -> np.ndarray:
@@ -147,7 +179,9 @@ class Viewport:
     def xyz(self) -> np.ndarray:
         return py360tools.transform.rotate(self._xyz, self.yaw_pitch_roll)
 
-    def _normals_default(self):
+    _normals: np.ndarray
+
+    def set_normals_default(self):
         """
         Com eixo entrando no observador, rotação horária é negativo e anti-horária
         é positivo. Todos os ângulos são radianos.
@@ -181,13 +215,12 @@ class Viewport:
         cos_fov = np.cos(fov_2)
         sin_fov = np.sin(fov_2)
         #                       (top, bottom, left, right)
-        _default = np.array([[0, 0, -cos_fov[1], cos_fov[1]],  # x
-                             [-cos_fov[0], cos_fov[0], 0, 0],  # y
-                             [-sin_fov[0], -sin_fov[0], -sin_fov[1], -sin_fov[1]]  # z
-                             ])
-        return _default
+        self._normals = np.array([[0, 0, -cos_fov[1], cos_fov[1]],  # x
+                                  [-cos_fov[0], cos_fov[0], 0, 0],  # y
+                                  [-sin_fov[0], -sin_fov[0], -sin_fov[1], -sin_fov[1]]  # z
+                                  ])
 
-    @property
+    @cached_property
     def _xyz_default(self):
         tan_fov_2 = np.tan(self.fov / 2)
         y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], self.vp_shape[0], endpoint=True)
