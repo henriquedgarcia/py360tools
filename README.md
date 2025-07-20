@@ -176,6 +176,7 @@ Image.fromarray(vp_image).show()
 - `opencv-python`
 
 ## Install
-
+- `git clone https://github.com/henriquedgarcia/py360tools.git`
+- `cd py360tools`
 - `pip install -e .`
 
