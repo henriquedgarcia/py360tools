@@ -42,7 +42,7 @@ class TestErp(unittest.TestCase):
         # Load expected values
         cls.xyz_test_data = load_test_data(xyz_file, cls.projection.xyz)
         cls.vp_img_test_data = load_test_data(vp_img_file, cls.viewport.extract_viewport(cls.frame_array))
-        cls.vptiles_test_data = load_test_data(vptiles_file, list(map(int, cls.viewport.get_vptiles())))
+        cls.vptiles_test_data = load_test_data(vptiles_file, [tile.idx for tile in cls.viewport.get_vptiles()])
 
     def test_nm2xyz(self):
         xyz = self.projection.nm2xyz(self.projection.nm)
@@ -58,7 +58,7 @@ class TestErp(unittest.TestCase):
         self.assertTrue(np.array_equal(vp_img, self.vp_img_test_data))
 
     def test_get_vptiles(self):
-        self.assertTrue(np.array_equal(self.vptiles_test_data, list(map(int, self.viewport.get_vptiles()))))
+        self.assertTrue(np.array_equal(self.vptiles_test_data, [tile.idx for tile in self.viewport.get_vptiles()]))
 
 
 def load_xyz_test_data(xyz_test_data):
