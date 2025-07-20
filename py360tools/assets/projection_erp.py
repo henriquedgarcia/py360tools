@@ -2,7 +2,7 @@ import numpy as np
 
 from py360tools.assets.projection_base import ProjectionBase
 from py360tools.transform.transform import ea2xyz, xyz2ea
-from py360tools.utils.util_transform import check_ea
+from py360tools.utils.util import check_ea
 
 
 class ERP(ProjectionBase):
