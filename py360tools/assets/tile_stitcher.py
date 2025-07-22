@@ -58,6 +58,7 @@ class TileStitcher:
         :raises StopIteration: When all tile streams are exhausted.
         :raises Exception: For general errors during the iteration process.
         """
+
         self.tiles_reader = {seen_tile: iter_video(file_path, gray=True)
                              for seen_tile, file_path in self.tiles_seen.items()}
         self.canvas = np.zeros(self.proj_shape, dtype='uint8')

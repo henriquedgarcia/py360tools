@@ -1,8 +1,9 @@
 from pathlib import Path
 from time import time
 
-import cv2
 import numpy as np
+
+from py360tools.assets.read_video import ReadVideo
 
 
 def splitx(string: str) -> tuple[int, ...]:
@@ -105,32 +106,27 @@ def make_tile_positions(tiling: str, proj_shape: tuple) -> dict[int, tuple[int, 
 
 
 def iter_video(video_path: Path, gray=True, dtype='float64'):
-    """Iterate over frames in a video file.
-
-    Args:
-        video_path: Path to the video file
-        gray: If True, convert frames to grayscale
-        dtype: NumPy dtype for frame arrays
-
-    Yields:
-        np.ndarray: Video frames as NumPy arrays
-
-    Raises:
-        ValueError: If the video file cannot be opened
     """
-    cap = cv2.VideoCapture(f'{video_path}')
-    if not cap.isOpened():
-        raise ValueError(f"Could not open video file: {video_path}")
-    try:
-        while True:
-            ok, frame = cap.read()
-            if not ok:
-                break
-            if gray:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            yield frame.astype(dtype)
-    finally:
-        cap.release()
+    Iterate over frames in a video file.
+
+    The function reads a video file located at the specified path and yields video
+    frames as NumPy arrays. If the `gray` parameter is True, the frames will be
+    converted to grayscale. The `dtype` parameter specifies the NumPy dtype of the
+    frame arrays.
+
+    :param video_path: Path to the video file.
+    :type video_path: Path
+    :param gray: If True, converts frames to grayscale. Defaults to True.
+    :type gray: bool
+    :param dtype: NumPy data type for frame arrays. Defaults to 'float64'.
+    :type dtype: str
+    :return: Yields video frames as NumPy arrays.
+    :rtype: np.ndarray
+    :raises ValueError: If the video file cannot be opened.
+    """
+    video = ReadVideo(video_path, gray=gray, dtype=dtype)
+    for frame in video:
+        yield frame
 
 
 def check_ea(*, ea):
