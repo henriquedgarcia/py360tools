@@ -183,6 +183,8 @@ class Viewport:
 
     def set_normals_default(self):
         """
+        Esta descrição está desatualizada. Corrigir.
+
         Com eixo entrando no observador, rotação horária é negativo e anti-horária
         é positivo. Todos os ângulos são radianos.
 
