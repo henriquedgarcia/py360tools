@@ -1,4 +1,4 @@
-from py360tools.assets.projection_base import ProjectionBase
+from py360tools.assets.projection_base import ProjectionBase, Tile
 from py360tools.assets.projection_cmp import CMP
 from py360tools.assets.projection_erp import ERP
 from py360tools.assets.viewport import Viewport
