@@ -12,9 +12,9 @@ from ..utils.util import unflatten_index, get_borders_coord_nm
 @dataclass
 class Tile:
     idx: int
-    shape: Union[tuple, np.ndarray]
+    shape: Union[np.ndarray]
     position_tiling: tuple
-    position_nm: np.ndarray
+    position_nm: np.ndarray  # start nm point
     borders_nm: np.ndarray
     borders_xyz: np.ndarray
 
