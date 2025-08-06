@@ -2,8 +2,10 @@ from pathlib import Path
 
 import numpy as np
 
+from py360tools import Tile
+from py360tools.assets.read_video import ReadVideo
 from py360tools.utils import splitx
-from py360tools.utils.util import make_tile_positions, iter_video
+from py360tools.utils.util import make_tile_positions
 
 
 class TileStitcher:
@@ -18,14 +20,14 @@ class TileStitcher:
         canvas (np.ndarray): The projection frame buffer
 
     """
-    tiles_reader: dict
-    tile_positions: dict
-    canvas: np.ndarray
+    tiles_reader: dict = None
+    canvas: np.ndarray = None
 
     def __init__(self,
-                 tiles_seen: dict[int, Path],
+                 tiles_seen: dict[Tile, Path],
                  tiling: str,
                  proj_res: str,
+                 gray=True
                  ):
         """
         Initializes a new instance of the class, setting up the tile mapping and
@@ -38,42 +40,41 @@ class TileStitcher:
         :param proj_res: A string indicating the projection resolution, which is
             manipulated to determine the shape of the projected data.
         """
+        self.gray = gray
         self.tiles_seen = tiles_seen
         self.proj_shape = splitx(proj_res)[::-1]
-
-        self.tile_positions = make_tile_positions(tiling, self.proj_shape)
+        self.tile_positions = make_tile_positions(tiling, proj_res)
 
     def __iter__(self):
         """
-        Iterates through video frames from multiple tiles, composing a projected frame.
-
-        This method initializes an iterator for each video file corresponding to tiles seen
-        in `tiles_seen`. It also creates a canvas with the shape specified by `proj_shape`,
-        and iteratively generates frames until all tile streams are exhausted. Each frame
-        is composed by calling an internal method that mounts the projected frame. If an
-        error occurs during iteration, it is caught, logged, and re-raised as appropriate.
-
-        :return: A numpy array representing the composed frame at each iteration.
-        :rtype: numpy.ndarray
-        :raises StopIteration: When all tile streams are exhausted.
-        :raises Exception: For general errors during the iteration process.
+        Returns the iterator object itself.
+        Initializes (or re-initializes) tile readers and the canvas for a new iteration.
         """
-
-        self.tiles_reader = {seen_tile: iter_video(file_path, gray=True)
+        self.tiles_reader = {seen_tile: iter(ReadVideo(file_path, gray=self.gray, dtype='float64'))
                              for seen_tile, file_path in self.tiles_seen.items()}
         self.canvas = np.zeros(self.proj_shape, dtype='uint8')
+        return self
 
-        while True:
-            try:
-                self._mount_proj_frame()
-                yield self.canvas
-            except StopIteration:
-                break
-            except Exception as e:
-                print(f"Ocorreu um erro durante a iteração: {e}")
-                raise e
+    def __next__(self) -> np.ndarray:
+        """
+        Composes and returns the next projected frame by stitching frames from all tiles.
 
-    def _mount_proj_frame(self):
+        This method is called by the built-in `next()` function or during iteration
+        (e.g., in a `for` loop). It clears the canvas, retrieves the next frame from
+        each tile's video stream, stitches them onto the canvas, and returns the
+        composed frame.
+
+        :return: A numpy array representing the composed frame.
+        :rtype: numpy.ndarray
+        :raises StopIteration: When all tile streams are exhausted and no more frames
+            can be composed.
+        :raises Exception: For general errors during the frame composition process.
+        """
+        if self.tiles_reader is None or self.canvas is None:
+            raise StopIteration("Iterator not initialized or already exhausted.")
+        return self.mount_canvas()
+
+    def mount_canvas(self):
         """
         Constructs the projection frame by iterating through visible tiles, retrieving
         their corresponding frames, and blending them into the canvas. The function
@@ -84,8 +85,18 @@ class TileStitcher:
 
         :return: None
         """
-        self.canvas[:] = 0
         for tile in self.tiles_seen:
-            x_ini, x_end, y_ini, y_end = self.tile_positions[tile]
-            tile_frame = next(self.tiles_reader[tile])
-            self.canvas[y_ini:y_end, x_ini:x_end] = tile_frame
+            y_ini, x_ini = tile.position_nm
+            y_end, x_end = tile.position_nm + tile.shape
+            self.canvas[y_ini:y_end, x_ini:x_end] = next(self.tiles_reader[tile.idx])
+        return self.canvas
+
+    def reset(self):
+        """
+        Resets the position of all individual video tile readers to the beginning.
+        This allows replaying the stitched video from the start without re-instantiating
+        the TileStitcher object.
+        """
+        if self.tiles_reader:
+            for reader in self.tiles_reader.values():
+                reader.reset()
