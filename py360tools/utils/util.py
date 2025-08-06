@@ -62,7 +62,7 @@ def mse2psnr(_mse: float, max_sample=255.) -> float:
     return 10 * np.log10((max_sample ** 2 / _mse))
 
 
-def make_tile_positions(tiling: str, proj_shape: tuple) -> dict[int, tuple[int, int, int, int]]:
+def make_tile_positions(tiling: str, proj_res: str) -> dict[int, tuple[int, int, int, int]]:
     """
     Calculate tile positions within a given projection resolution and tiling configuration.
 
@@ -73,6 +73,7 @@ def make_tile_positions(tiling: str, proj_shape: tuple) -> dict[int, tuple[int, 
     the value is a tuple representing the rectangular area (in terms of start and end
     coordinates) of the tile.
 
+    :param proj_res:
     :param tiling: A tuple where the first element is the number of horizontal tiles
                    and the second element is the number of vertical tiles.
     :param proj_shape: A tuple representing the projection shape, where the first
@@ -85,23 +86,18 @@ def make_tile_positions(tiling: str, proj_shape: tuple) -> dict[int, tuple[int, 
                         by the tiling resolution.
     """
     tile_M, tile_N = splitx(tiling)
-    proj_h, proj_w = proj_shape
+    proj_w, proj_h = splitx(proj_res)
 
     if proj_w % tile_M != 0 or proj_h % tile_N != 0:
-        raise ValueError(f'The projection resolution ({proj_shape=}) must be a multiple of the tile resolution ({tiling=}).')
+        raise ValueError(f'The projection resolution ({proj_res=}) must be a multiple of the tile resolution ({tiling=}).')
 
     tile_w, tile_h = proj_w // tile_M, proj_h // tile_N
 
     tile_positions = {}
-    for tile in range(tile_N * tile_M):
-        tile_m, tile_n = unflatten_index(tile, (tile_N, tile_M))
-        tile_y = tile_h * int(tile_n)
-        tile_x = tile_w * int(tile_m)
-        x_ini = tile_x
-        x_end = tile_x + tile_w
-        y_ini = tile_y
-        y_end = tile_y + tile_h
-        tile_positions[tile] = (x_ini, x_end, y_ini, y_end)
+    for tile_n in range(tile_N):
+        for tile_m in range(tile_M):
+            tile_x, tile_y = tile_w * tile_m, tile_h * tile_n
+            tile_positions[tile_m * (tile_n + 1)] = (int(tile_x), int(tile_x + tile_w), int(tile_y), int(tile_y + tile_h))
     return tile_positions
 
 
