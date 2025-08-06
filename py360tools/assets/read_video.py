@@ -12,25 +12,22 @@ class ReadVideo:
         self.gray = gray
         self.dtype = dtype
 
-    def __iter__(self):
+    def __next__(self):
         """
-            Iterator method for reading frames from a video capture object.
 
-            This method continuously captures frames from the video source until either the
-            end of the stream is reached or the capture fails. If the gray option is enabled,
-            frames will be converted to grayscale before being yielded. Each frame is returned
-            with the specified data type.
+        :return:
+        """
+        ok, frame = self.cap.read()
+        if not ok:
+            raise StopIteration
 
-            :yield: A video frame as a NumPy array, optionally in grayscale and of the specified data type.
-            :rtype: numpy.ndarray
-            """
-        while True:
-            ok, frame = self.cap.read()
-            if not ok:
-                break
-            if self.gray:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            yield frame.astype(self.dtype)
+        if self.gray:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        return frame.astype(self.dtype)
+
+    def __iter__(self):
+        self.reset() # Ensure we start from the beginning when a new iteration begins
+        return self
 
     def reset(self):
         """
