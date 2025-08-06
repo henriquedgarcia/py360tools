@@ -236,3 +236,17 @@ class Viewport:
 
         vp_xyz_default: np.ndarray = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
         return vp_xyz_default
+
+def gnomonic_nm2xyz(nm_coord, fov, vp_shape):
+    tan_fov_2 = np.tan(fov / 2)
+    y_coord = np.linspace(-tan_fov_2[0], tan_fov_2[0], vp_shape[0], endpoint=True)
+    x_coord = np.linspace(-tan_fov_2[1], tan_fov_2[1], vp_shape[1], endpoint=False)
+
+    vp_coord_x, vp_coord_y = np.meshgrid(x_coord, y_coord)
+    vp_coord_z = np.ones(vp_shape)
+    vp_coord_xyz_ = np.array([vp_coord_x, vp_coord_y, vp_coord_z])
+
+    r = np.sqrt(np.sum(vp_coord_xyz_ ** 2, axis=0, keepdims=True))
+
+    vp_xyz_default: np.ndarray = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
+    return vp_xyz_default
