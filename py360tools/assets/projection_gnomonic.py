@@ -9,7 +9,7 @@ from py360tools.utils.util import check_ea
 
 class Gnomonic(ProjectionBase):
     center_point: tuple[float, float, float]
-    fov: np.ndarray[float]  # shape==(3,)
+    fov: np.ndarray  # shape==(3,)
     vp_shape: np.ndarray  # shape==(3,)
 
     def nm2xyz(self, nm):
