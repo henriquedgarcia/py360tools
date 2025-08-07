@@ -55,7 +55,6 @@ def position2displacement(df_positions):
     """
 
     # convert to numpy
-    # noinspection PyTypeChecker
     positions = np.array(df_positions[['yaw', 'pitch']])
     pos = ea2xyz(ea=positions.T).T
 
@@ -82,7 +81,8 @@ def get_vptiles(projection, viewport) -> list:
     if str(projection.tiling) == '1x1': return [0]
 
     vptiles = []
-    for tile in projection.tile_list.values():
-        if np.any(viewport.is_viewport(tile.borders_xyz)):
+    for tile in projection.tile_list:
+        borders_xyz = projection.nm2xyz(tile.borders)
+        if np.any(viewport.is_viewport(borders_xyz)):
             vptiles.append(tile)
     return vptiles
