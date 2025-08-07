@@ -24,7 +24,7 @@ class TileStitcher:
     canvas: np.ndarray = None
 
     def __init__(self,
-                 tiles_seen: dict[Tile, Path],
+                 tiles_seen: list[Tile],
                  tiling: str,
                  proj_res: str,
                  gray=True
@@ -50,8 +50,8 @@ class TileStitcher:
         Returns the iterator object itself.
         Initializes (or re-initializes) tile readers and the canvas for a new iteration.
         """
-        self.tiles_reader = {seen_tile: iter(ReadVideo(file_path, gray=self.gray, dtype='float64'))
-                             for seen_tile, file_path in self.tiles_seen.items()}
+        self.tiles_reader = {tile: iter(ReadVideo(tile.path, gray=self.gray, dtype='float64'))
+                             for tile in self.tiles_seen}
         self.canvas = np.zeros(self.proj_shape, dtype='uint8')
         return self
 
@@ -86,9 +86,12 @@ class TileStitcher:
         :return: None
         """
         for tile in self.tiles_seen:
-            y_ini, x_ini = tile.position_nm
-            y_end, x_end = tile.position_nm + tile.shape
-            self.canvas[y_ini:y_end, x_ini:x_end] = next(self.tiles_reader[tile.idx])
+            y_ini, x_ini = tile.position
+            y_end, x_end = tile.position + tile.shape
+            self.canvas[y_ini:y_end, x_ini:x_end] = next(self.tiles_reader[tile])  # caution with projection
+
+        from PIL import Image
+        Image.fromarray(self.canvas).show()
         return self.canvas
 
     def reset(self):
