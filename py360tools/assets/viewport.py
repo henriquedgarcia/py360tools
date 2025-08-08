@@ -40,7 +40,7 @@ class Viewport:
         self._yaw_pitch_roll = np.array([0., 0., 0.])
         self.projection = projection
 
-    def extract_viewport(self, frame_array, yaw_pitch_roll=None) -> np.ndarray:
+    def extract_viewport(self, proj_frame, yaw_pitch_roll=None) -> np.ndarray:
         """
         Extracts a viewport image based on the input frame and yaw-pitch-roll orientation.
 
@@ -48,9 +48,9 @@ class Viewport:
         image based on spherical coordinates determined by yaw, pitch, and roll. The extraction
         process involves mapping frame data onto a spherical projection.
 
-        :param frame_array: The input 2D or 3D frame data representing the image or video frame
+        :param proj_frame: The input 2D or 3D frame data representing the image or video frame
             to be transformed into a viewport.
-        :type frame_array: np.ndarray
+        :type proj_frame: np.ndarray
         :param yaw_pitch_roll: The yaw, pitch, and roll values representing the orientation for
             viewport transformation, or None for default/default existing orientation.
         :type yaw_pitch_roll: Optional[Tuple[float, float, float]]
@@ -64,7 +64,7 @@ class Viewport:
         self.yaw_pitch_roll = yaw_pitch_roll if yaw_pitch_roll is not None else self.yaw_pitch_roll
         nm_coord = self.projection.xyz2nm(self.xyz)
         nm_coord = nm_coord.transpose((1, 2, 0))
-        vp_img = cv2.remap(frame_array, map1=nm_coord[..., 1:2].astype(np.float32),
+        vp_img = cv2.remap(proj_frame, map1=nm_coord[..., 1:2].astype(np.float32),
                            map2=nm_coord[..., 0:1].astype(np.float32), interpolation=cv2.INTER_LINEAR,
                            borderMode=cv2.BORDER_WRAP)
         # show(vp_img)
@@ -236,6 +236,7 @@ class Viewport:
 
         vp_xyz_default: np.ndarray = vp_coord_xyz_ / r  # normalize. final shape==(3,H,W)
         return vp_xyz_default
+
 
 def gnomonic_nm2xyz(nm_coord, fov, vp_shape):
     tan_fov_2 = np.tan(fov / 2)
