@@ -90,8 +90,8 @@ class TileStitcher:
             y_end, x_end = tile.position + tile.shape
             self.canvas[y_ini:y_end, x_ini:x_end] = next(self.tiles_reader[tile])  # caution with projection
 
-        from PIL import Image
-        Image.fromarray(self.canvas).show()
+        # from PIL import Image
+        # Image.fromarray(self.canvas).show()
         return self.canvas
 
     def reset(self):
