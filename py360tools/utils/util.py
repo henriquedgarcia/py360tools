@@ -1,3 +1,4 @@
+from itertools import product
 from pathlib import Path
 from time import time
 
@@ -94,10 +95,9 @@ def make_tile_positions(tiling: str, proj_res: str) -> dict[int, tuple[int, int,
     tile_w, tile_h = proj_w // tile_M, proj_h // tile_N
 
     tile_positions = {}
-    for tile_n in range(tile_N):
-        for tile_m in range(tile_M):
-            tile_x, tile_y = tile_w * tile_m, tile_h * tile_n
-            tile_positions[tile_m * (tile_n + 1)] = (int(tile_x), int(tile_x + tile_w), int(tile_y), int(tile_y + tile_h))
+    for tile_n, tile_m in product(range(tile_N), range(tile_M)):
+        tile_x, tile_y = tile_w * tile_m, tile_h * tile_n
+        tile_positions[tile_m * (tile_n + 1)] = (int(tile_x), int(tile_x + tile_w), int(tile_y), int(tile_y + tile_h))
     return tile_positions
 
 
