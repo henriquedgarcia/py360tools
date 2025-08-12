@@ -107,7 +107,7 @@ class Viewport:
         belong = np.all(inner_prod <= 0, axis=0)
         return belong
 
-    def get_vp_mask(self, lum=255) -> np.ndarray:
+    def draw_mask(self, lum=255) -> np.ndarray:
         """
         Project the sphere using ERP. Where is Viewport the
         :param lum: value to draw line
@@ -118,7 +118,7 @@ class Viewport:
         canvas[belong] = lum
         return canvas
 
-    def get_vp_borders(self, thickness=1, lum=255) -> np.ndarray:
+    def draw_borders(self, thickness=1, lum=255) -> np.ndarray:
         """
         Draw the borders of the provided viewport using specified thickness and
         luminance. The function projects the sphere using ERP and uses the viewport
@@ -138,7 +138,7 @@ class Viewport:
         canvas[nm[0, ...], nm[1, ...]] = lum
         return canvas
 
-    def get_vp_tiles(self, lum=255) -> np.ndarray:
+    def draw_tiles_seen(self, lum=255) -> np.ndarray:
         """
         Draw visual perspective (VP) tiles onto a canvas based on the provided viewport.
 
@@ -154,7 +154,7 @@ class Viewport:
         """
         canvas = np.zeros(self.projection.shape, dtype='uint8')
         for tile in self.get_vptiles():
-            canvas = canvas + self.projection.draw_tile_border(tile, lum=lum)
+            canvas[tile.borders[0], tile.borders[1]] = lum
         return canvas
 
     @property
