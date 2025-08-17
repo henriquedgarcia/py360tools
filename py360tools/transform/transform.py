@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from numpy.linalg import norm
 
+from py360tools import Tile
 from py360tools.assets.matrot import MatRot
 
 
@@ -70,7 +71,7 @@ def rotate(xyz, yaw_pitch_roll):
     return np.tensordot(matrix, xyz, axes=1)
 
 
-def get_vptiles(projection, viewport) -> list:
+def get_vptiles(projection, viewport) -> list[Tile]:
     """
 
     :param projection:
@@ -78,8 +79,6 @@ def get_vptiles(projection, viewport) -> list:
     :return:
     :rtype: list[Tile]
     """
-    if str(projection.tiling) == '1x1': return [0]
-
     vptiles = []
     for tile in projection.tile_list:
         borders_xyz = projection.nm2xyz(tile.borders)
