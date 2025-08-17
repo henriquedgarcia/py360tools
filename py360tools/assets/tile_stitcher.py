@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import numpy as np
+from PIL import Image
 
 from py360tools import Tile
 from py360tools.assets.read_video import ReadVideo
@@ -88,7 +87,11 @@ class TileStitcher:
         for tile in self.tiles_seen:
             y_ini, x_ini = tile.position
             y_end, x_end = tile.position + tile.shape
-            self.canvas[y_ini:y_end, x_ini:x_end] = next(self.tiles_reader[tile])  # caution with projection
+            tile_frame = next(self.tiles_reader[tile])
+            x0, x1, y0, y1 = self.tile_positions[int(tile)]
+            w, h = x1 - x0, y1 - y0
+            tile_frame = np.array(Image.fromarray(tile_frame).resize((w, h)))
+            self.canvas[y_ini:y_end, x_ini:x_end] = tile_frame  # caution with projection
 
         # from PIL import Image
         # Image.fromarray(self.canvas).show()
