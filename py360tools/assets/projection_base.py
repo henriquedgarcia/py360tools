@@ -58,7 +58,7 @@ class ProjectionBase(ABC):
 
         self.tile_list = self.make_tile_list()
 
-    def make_tile_list(self):
+    def make_tile_list(self) -> list[Tile]:
         tile_list: list[Tile] = []
         for tile in range(self.n_tile):
             tiling_position = np.unravel_index(tile, self.tiling_shape)  # (n, m)
