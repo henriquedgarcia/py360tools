@@ -5,3 +5,4 @@ from py360tools.assets.viewport import Viewport
 from py360tools.assets.tile_stitcher import TileStitcher
 from py360tools.draw.draw import compose, show
 from py360tools.transform.transform import xyz2ea
+from py360tools.utils import AutoDict, splitx
