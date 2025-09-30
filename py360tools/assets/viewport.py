@@ -58,7 +58,7 @@ class Viewport:
         :rtype: np.ndarray
         :raises ProjectionError: If the projection object is not defined or uninitialized.
         """
-
+        tuple(proj_frame.shape)[:2] == tuple(self.projection.shape)[:2]
         if self.projection is None:
             raise ProjectionError('Projection is not defined.')
         self.yaw_pitch_roll = yaw_pitch_roll if yaw_pitch_roll is not None else self.yaw_pitch_roll
