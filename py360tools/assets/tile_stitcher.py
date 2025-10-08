@@ -39,6 +39,7 @@ class TileStitcher:
         :param proj_res: A string indicating the projection resolution, which is
             manipulated to determine the shape of the projected data.
         """
+        # todo: No futuro quero fazer com que o TileStitcher receba apenas um objeto projection
         self.gray = gray
         self.tiles_seen = tiles_seen
         self.proj_shape = splitx(proj_res)[::-1]
