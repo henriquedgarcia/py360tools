@@ -58,10 +58,13 @@ class Viewport:
         :rtype: np.ndarray
         :raises ProjectionError: If the projection object is not defined or uninitialized.
         """
-        tuple(proj_frame.shape)[:2] == tuple(self.projection.shape)[:2]
+        if tuple(proj_frame.shape)[:2] != tuple(self.projection.shape)[:2]:
+            raise ValueError(f"Input frame shape {tuple(proj_frame.shape)[:2]} does not match projection shape {tuple(self.projection.shape)[:2]}")
         if self.projection is None:
             raise ProjectionError('Projection is not defined.')
-        self.yaw_pitch_roll = yaw_pitch_roll if yaw_pitch_roll is not None else self.yaw_pitch_roll
+        if yaw_pitch_roll is not None:
+            self.yaw_pitch_roll = yaw_pitch_roll
+
         nm_coord = self.projection.xyz2nm(self.xyz)
         nm_coord = nm_coord.transpose((1, 2, 0))
         vp_img = cv2.remap(proj_frame, map1=nm_coord[..., 1:2].astype(np.float32),
@@ -85,8 +88,7 @@ class Viewport:
         :rtype: list[Tile]
         :raises ProjectionError: If the projection is not defined.
         """
-
-        self.yaw_pitch_roll = self.yaw_pitch_roll if yaw_pitch_roll is None else yaw_pitch_roll
+        if yaw_pitch_roll is not None: self.yaw_pitch_roll = yaw_pitch_roll
         vptiles = get_vptiles(self.projection, self)
         return vptiles
 
