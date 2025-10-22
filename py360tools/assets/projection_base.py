@@ -16,6 +16,7 @@ class Tile:
     shape: Union[np.ndarray] = None
     position: Union[np.ndarray, tuple[int, int]] = None
     path: Path = None
+    canvas: np.ndarray = None
 
     @cached_property
     def borders(self) -> Union[np.ndarray, tuple[int, int]]:
@@ -40,6 +41,7 @@ class Tile:
 class ProjectionBase(ABC):
     def __init__(self, *, proj_res, tiling='1x1'):
         """
+        tile.position
 
         :param proj_res: A string representing the projection resolution. E.g. '600x300'
         :type proj_res: str
