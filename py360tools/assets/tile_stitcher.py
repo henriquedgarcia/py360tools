@@ -3,7 +3,6 @@ from PIL import Image
 
 from py360tools import Tile, ProjectionBase
 from py360tools.assets.read_video import ReadVideo
-from py360tools.utils import splitx
 from py360tools.utils.util import make_tile_positions
 
 
@@ -93,6 +92,7 @@ class TileStitcher:
 
         :return: None
         """
+        tile: Tile
         for tile in self.tiles_seen:
             tile_frame = next(self.tiles_reader[tile])
             x0, x1, y0, y1 = self.tile_positions[int(tile)]
