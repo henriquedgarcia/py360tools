@@ -16,6 +16,7 @@ class Tile:
     shape: Union[np.ndarray] = None
     position: Union[np.ndarray, tuple[int, int]] = None
     path: Path = None
+    canvas: np.ndarray = None
 
     @cached_property
     def borders(self) -> Union[np.ndarray, tuple[int, int]]:
