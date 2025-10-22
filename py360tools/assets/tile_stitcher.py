@@ -85,14 +85,15 @@ class TileStitcher:
 
         :return: None
         """
+        tile: Tile
         for tile in self.tiles_seen:
             y_ini, x_ini = tile.position
             y_end, x_end = tile.position + tile.shape
-            tile_frame = next(self.tiles_reader[tile])
+            tile.canvas = next(self.tiles_reader[tile])
             x0, x1, y0, y1 = self.tile_positions[int(tile)]
             w, h = x1 - x0, y1 - y0
-            tile_frame = np.array(Image.fromarray(tile_frame).resize((w, h)))
-            self.canvas[y_ini:y_end, x_ini:x_end] = tile_frame  # caution with projection
+            tile.canvas = np.array(Image.fromarray(tile.canvas).resize((w, h)))
+            self.canvas[y_ini:y_end, x_ini:x_end] = tile.canvas  # caution with projection
 
         # from PIL import Image
         # Image.fromarray(self.canvas).show()
