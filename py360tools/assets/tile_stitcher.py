@@ -23,8 +23,6 @@ class TileStitcher:
 
     def __init__(self,
                  tiles_seen: list[Tile],
-                 tiling: str,
-                 proj_res: str,
                  proj_obj: ProjectionBase,
                  gray=True
                  ):
@@ -43,11 +41,7 @@ class TileStitcher:
         self.gray = gray
         self.tiles_seen = tiles_seen
         self.proj_obj = proj_obj
-        self.tile_positions = make_tile_positions(tiling, proj_res)
 
-    # @property
-    # def tile_positions(self):
-    #     return
     @property
     def proj_shape(self):
         return self.proj_obj.shape
@@ -59,7 +53,7 @@ class TileStitcher:
         """
         self.tiles_reader = {tile: iter(ReadVideo(tile.path, gray=self.gray, dtype='float64'))
                              for tile in self.tiles_seen}
-        self.canvas = np.zeros(self.proj_shape, dtype='uint8')
+        self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         return self
 
     def __next__(self) -> np.ndarray:
@@ -95,9 +89,7 @@ class TileStitcher:
         tile: Tile
         for tile in self.tiles_seen:
             tile_frame = next(self.tiles_reader[tile])
-            x0, x1, y0, y1 = self.tile_positions[int(tile)]
-            w, h = x1 - x0, y1 - y0
-            tile_frame = np.array(Image.fromarray(tile_frame).resize((w, h)))
+            tile_frame = np.array(Image.fromarray(tile_frame).resize(tile.shape[::-1]))  # às vezes a resolução do vídeo é diferente do objeto projection
 
             y_ini, x_ini = tile.position
             y_end, x_end = tile.position + tile.shape
