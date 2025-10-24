@@ -1,0 +1,5 @@
+/.idea
+*.pyc
+py360tools.dia
+py360tools.dia.autosave
+*.dia~
