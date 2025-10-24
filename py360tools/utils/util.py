@@ -168,7 +168,7 @@ def get_borders_coord_nm(position, shape):
     of a rectangle defined by its top-left position and shape dimensions. The resulting
     coordinates are concatenated into a single array.
 
-    :param position: Coordinates of the top-left corner of the rectangle (x, y).
+    :param position: Coordinates of the top-left corner of the rectangle (y, x).
     :type position: list | tuple | np.ndarray
     :param shape: Dimensions of the rectangle (height, width).
     :type shape: list | tuple | np.ndarray
