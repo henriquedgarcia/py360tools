@@ -39,9 +39,14 @@ class TestCmp(unittest.TestCase):
         cls.frame_array = np.array(frame_img)
 
         # Load expected values
-        cls.xyz_test_data = load_test_data(xyz_file, cls.projection.xyz)
-        cls.vp_img_test_data = load_test_data(vp_img_file, cls.viewport.extract_viewport(cls.frame_array))
-        cls.vptiles_test_data = load_test_data(vptiles_file, [tile.idx for tile in cls.viewport.get_vptiles()])
+        xyz = cls.projection.xyz
+        cls.xyz_test_data = load_test_data(xyz_file, xyz)
+
+        vp = cls.viewport.extract_viewport(cls.frame_array)
+        cls.vp_img_test_data = load_test_data(vp_img_file, vp)
+
+        vptiles = [tile.idx for tile in cls.viewport.get_vptiles()]
+        cls.vptiles_test_data = load_test_data(vptiles_file, vptiles)
 
     def test_nm2xyz(self):
         xyz = self.projection.nm2xyz(self.projection.nm)
