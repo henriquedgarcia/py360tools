@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import Union
@@ -10,17 +9,25 @@ from ..utils import create_nm_coords, splitx
 from ..utils.util import get_borders_coord_nm
 
 
-@dataclass
 class Tile:
-    idx: int = None
-    shape: Union[np.ndarray] = None
-    position: Union[np.ndarray, tuple[int, int]] = None
-    path: Path = None
-    canvas: np.ndarray = None
+    def __init__(self, idx: int = None,
+                 shape: Union[np.ndarray] = None,
+                 position: Union[np.ndarray, tuple[int, int]] = None,
+                 path: Path = None):
+        self.idx = idx
+        self.shape = np.array(shape)
+        self.position = np.array(position)
+        self.path = path
+
+    @cached_property
+    def canvas(self):
+        return np.zeros(self.shape)
 
     @cached_property
     def borders(self) -> Union[np.ndarray, tuple[int, int]]:
-        return get_borders_coord_nm(self.position, self.shape).astype(int)
+        borders_coord_nm = get_borders_coord_nm(self.position, self.shape)
+        borders_coord_nm = borders_coord_nm.astype(int)
+        return borders_coord_nm
 
     def __hash__(self):
         return hash(f'{self.idx}@{self.position}@{self.shape}')
