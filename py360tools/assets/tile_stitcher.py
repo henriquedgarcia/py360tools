@@ -3,7 +3,6 @@ from PIL import Image
 
 from py360tools import Tile, ProjectionBase
 from py360tools.assets.read_video import ReadVideo
-from py360tools.utils.util import make_tile_positions
 
 
 class TileStitcher:
@@ -18,7 +17,7 @@ class TileStitcher:
         canvas (np.ndarray): The projection frame buffer
 
     """
-    tiles_reader: dict = None
+    tiles_reader: dict[Tile, ReadVideo] = None
     canvas: np.ndarray = None
 
     def __init__(self,
@@ -38,9 +37,9 @@ class TileStitcher:
             manipulated to determine the shape of the projected data.
         """
         # todo: No futuro quero fazer com que o TileStitcher receba apenas um objeto projection
-        self.gray = gray
-        self.tiles_seen = tiles_seen
+        self.tiles_seen = tiles_seen  # converter para lista de int
         self.proj_obj = proj_obj
+        self.gray = gray
 
     @property
     def proj_shape(self):
@@ -53,7 +52,6 @@ class TileStitcher:
         """
         self.tiles_reader = {tile: iter(ReadVideo(tile.path, gray=self.gray, dtype='float64'))
                              for tile in self.tiles_seen}
-        self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         return self
 
     def __next__(self) -> np.ndarray:
@@ -65,12 +63,17 @@ class TileStitcher:
         each tile's video stream, stitches them onto the canvas, and returns the
         composed frame.
 
+        OBS. For each iteration the canvas is updated with the next frame from each tile.
+        So, if you want to use an anterior frame ex: diference(old_frame, new_frame),
+        you need to create a copy
+
         :return: A numpy array representing the composed frame.
         :rtype: numpy.ndarray
         :raises StopIteration: When all tile streams are exhausted and no more frames
             can be composed.
-        :raises Exception: For general errors during the frame composition process.
+        :raises Exception: For general errors during the frame stream (maybe OpenCV or FFmpeg).
         """
+        self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         if self.tiles_reader is None or self.canvas is None:
             raise StopIteration("Iterator not initialized or already exhausted.")
         return self.mount_canvas()
@@ -86,6 +89,7 @@ class TileStitcher:
 
         :return: None
         """
+        self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         tile: Tile
         for tile in self.tiles_seen:
             tile_frame = next(self.tiles_reader[tile])
