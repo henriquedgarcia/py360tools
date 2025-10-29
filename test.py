@@ -8,15 +8,10 @@ from tests.test_erp.test_erp import TestErp
 from tests.test_erp.test_erp_transform import TestErpTransform
 from tests.test_utils.test_hm import TestPosition2Trajectory
 from tests.test_viewport.test_viewport import TestViewport
+from tests.test_tilestitcher.test_tilestitcher import TestTileStitcher
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)
-
-    print('\nRUNNING VIEWPORT TESTS')
-    suite_viewport = unittest.TestSuite()
-    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
-    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestViewport))
-    runner.run(suite_viewport)
 
     print('\nRUNNING CMP TESTS')
     suite_cmp = unittest.TestSuite()
@@ -31,3 +26,14 @@ if __name__ == '__main__':
     suite_erp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErp))
     suite_erp.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestErpDrawMethods))
     runner.run(suite_erp)
+
+    print('\nRUNNING VIEWPORT TESTS')
+    suite_viewport = unittest.TestSuite()
+    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestPosition2Trajectory))
+    suite_viewport.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestViewport))
+    runner.run(suite_viewport)
+
+    print('\nRUNNING TileStitcher TESTS')
+    suite_tilestitcher = unittest.TestSuite()
+    suite_tilestitcher.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestTileStitcher))
+    runner.run(suite_tilestitcher)
