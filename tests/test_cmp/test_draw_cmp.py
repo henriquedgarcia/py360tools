@@ -5,8 +5,10 @@ import numpy as np
 from PIL import Image
 
 from py360tools import Viewport, CMP
+from py360tools.draw import show
 from py360tools.utils import load_test_data
 
+show = show
 __FILENAME__ = Path(__file__).absolute()
 __PATH__ = __FILENAME__.parent
 __ASSETS__ = __PATH__ / f'assets/{__FILENAME__.stem}'
@@ -38,29 +40,29 @@ class TestCmpDrawMethods(unittest.TestCase):
         canvas = self.projection.draw_all_tiles_borders()
         draw_all_tiles_borders_test = load_test_data(draw_all_tiles_borders_test_file,
                                                      canvas)
-        # draw.show(canvas)
+        # show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_all_tiles_borders_test))
 
     def test_draw_vp_borders(self):
         draw_vp_borders_test_file = Path(f'{__ASSETS__}/draw_vp_borders_test_file.pickle')
-        canvas = self.viewport.get_vp_borders()
+        canvas = self.viewport.draw_borders()
         draw_vp_borders_test = load_test_data(draw_vp_borders_test_file, canvas)
-        # draw.show(canvas)
+        # show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_borders_test))
 
     def test_draw_vp_mask(self):
         draw_vp_mask_test_file = Path(f'{__ASSETS__}/draw_vp_mask_test_file.pickle')
-        canvas = self.viewport.get_vp_mask()
+        canvas = self.viewport.draw_mask()
         draw_vp_mask_test = load_test_data(draw_vp_mask_test_file, canvas)
-        # draw.show(canvas)
+        # show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_mask_test))
 
     def test_draw_vp_tiles(self):
         draw_vp_tiles_test_file = Path(f'{__ASSETS__}/draw_vp_tiles_test_file.pickle')
-        canvas = self.viewport.get_vp_tiles()
+        canvas = self.viewport.draw_tiles_seen()
         draw_vp_tiles_test = load_test_data(draw_vp_tiles_test_file,
                                             canvas)
-        # draw.show(canvas)
+        # show(canvas)
         self.assertTrue(np.array_equal(canvas, draw_vp_tiles_test))
 
     def test_get_viewport_image(self):
@@ -68,5 +70,5 @@ class TestCmpDrawMethods(unittest.TestCase):
         get_viewport_image = self.viewport.extract_viewport(self.frame_array)
         get_viewport_image_test = load_test_data(get_viewport_image_test_file,
                                                  get_viewport_image)
-        # draw.show(get_viewport_image)
+        # show(get_viewport_image)
         self.assertTrue(np.array_equal(get_viewport_image_test, get_viewport_image))
