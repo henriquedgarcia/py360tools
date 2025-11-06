@@ -1,7 +1,8 @@
+from _collections_abc import Iterable
+
 import numpy as np
 from PIL import Image
-
-from py360tools import Tile, ProjectionBase
+from py360tools import ProjectionBase, Tile
 from py360tools.assets.read_video import ReadVideo
 
 
@@ -20,21 +21,15 @@ class TileStitcher:
     tiles_reader: dict[Tile, ReadVideo] = None
     canvas: np.ndarray = None
 
-    def __init__(self,
-                 tiles_seen: list[Tile],
-                 proj_obj: ProjectionBase,
-                 gray=True
-                 ):
+    def __init__(self, tiles_seen: list[Tile], proj_obj: ProjectionBase, gray=True):
         """
         Initializes a new instance of the class, setting up the tile mapping and
         projection resolution for further computations.
 
-        :param tiles_seen: A dictionary mapping integer keys to Path objects, which
-            represents the collection of tiles observed or processed.
+        :param tiles_seen: A list of Tiles which represents of the tiles observed.
         :param tiling: A string representing the tiling configuration used for
-            arranging or processing the tiles.
-        :param proj_res: A string indicating the projection resolution, which is
-            manipulated to determine the shape of the projected data.
+            arranging the tiles.
+        :param proj_res: A string indicating the full projection resolution.
         """
         # todo: No futuro quero fazer com que o TileStitcher receba apenas um objeto projection
         self.tiles_seen = tiles_seen  # converter para lista de int
@@ -48,9 +43,11 @@ class TileStitcher:
     def __iter__(self):
         """
         Returns the iterator object itself.
-        Initializes (or re-initializes) tile readers and the canvas for a new iteration.
+        Initializes (or re-initializes) tile readers and the canvas for a new 
+        iteration.
         """
-        self.tiles_reader = {tile: iter(ReadVideo(tile.path, gray=self.gray, dtype='float64'))
+        self.canvas = np.zeros(self.proj_shape, dtype='uint8')
+        self.tiles_reader = {tile: iter(ReadVideo(tile.path, gray=self.gray, dtype='float64')) 
                              for tile in self.tiles_seen}
         return self
 
@@ -73,7 +70,6 @@ class TileStitcher:
             can be composed.
         :raises Exception: For general errors during the frame stream (maybe OpenCV or FFmpeg).
         """
-        self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         if self.tiles_reader is None or self.canvas is None:
             raise StopIteration("Iterator not initialized or already exhausted.")
         return self.mount_canvas()
@@ -91,12 +87,17 @@ class TileStitcher:
         """
         self.canvas = np.zeros(self.proj_obj.shape, dtype='uint8')
         tile: Tile
-        for tile in self.tiles_seen:
-            tile_frame = next(self.tiles_reader[tile])
-            tile_frame = np.array(Image.fromarray(tile_frame).resize(tile.shape[::-1]))  # às vezes a resolução do vídeo é diferente do objeto projection
+        for tile, reader in self.tiles_reader.items():
+            tile_frame = next(reader)
+
+            # às vezes a resolução do vídeo é diferente do objeto projection
+            tile_frame = Image.fromarray(tile_frame)
+            tile_frame = tile_frame.resize(tile.shape[::-1])
+            tile_frame = np.array(tile_frame)
 
             y_ini, x_ini = tile.position
             y_end, x_end = tile.position + tile.shape
+
             self.canvas[y_ini:y_end, x_ini:x_end] = tile_frame  # caution with projection
 
         # from PIL import Image
