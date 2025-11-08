@@ -13,15 +13,13 @@ class Tile:
     def __init__(self, idx: int = None,
                  shape: Union[np.ndarray] = None,
                  position: Union[np.ndarray, tuple[int, int]] = None,
-                 path: Path = None):
+                 path: Path = None,
+                 canvas: np.ndarray = None):
         self.idx = idx
         self.shape = np.array(shape)
         self.position = np.array(position)
         self.path = path
-
-    @cached_property
-    def canvas(self):
-        return np.zeros(self.shape)
+        self.canvas = canvas
 
     @cached_property
     def borders(self) -> Union[np.ndarray, tuple[int, int]]:
