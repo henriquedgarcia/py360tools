@@ -89,7 +89,7 @@ class TileStitcher:
         tile: Tile
         for tile, reader in self.tiles_reader.items():
             tile_frame = next(reader)
-
+            tile.canvas = tile_frame
             # às vezes a resolução do vídeo é diferente do objeto projection
             tile_frame = Image.fromarray(tile_frame)
             tile_frame = tile_frame.resize(tile.shape[::-1])
