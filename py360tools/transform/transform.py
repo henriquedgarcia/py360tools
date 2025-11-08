@@ -80,7 +80,12 @@ def get_vptiles(projection, viewport) -> list[Tile]:
     :rtype: list[Tile]
     """
     vptiles = []
+
     for tile in projection.tile_list:
+        if projection.tiling == '1x1':
+            vptiles.append(tile)
+            continue
+
         borders_xyz = projection.nm2xyz(tile.borders)
         if np.any(viewport.is_viewport(borders_xyz)):
             vptiles.append(tile)
