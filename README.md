@@ -1,6 +1,101 @@
 # py360tools
+## Sumário
 
-Utilitários para transformações em vídeo 360. As projeções são subclasses de
+- [Introdução](#introdução)
+- [API](#api) 
+- [Exemplos](#examples)
+- [Outras Funções](#other-functions)
+- [Dependências](#depends)
+- [Instalação](#install)
+
+## Introdução
+
+O py360tools é um conjunto de ferramentas para manipulação de vídeo 360° com 
+ladrilhos (tiles). Sua arquitetura se baseia nas transformações do domínio da 
+projeção no domíno da esfera e vice-versa. Com uma interface comum é possível 
+que um pixel transite para qualquer projeção/viewport.
+
+<img src="docs/img/arquitetura.png" alt="Descrição" width="300"/>
+
+As classes principais são as classes das projeções. Atualmente a py360tools 
+suporta apenas projeção equirretangular e projeção cubemap. A projeção cria 
+"Tiles" que contem informações que serão usadas por outras classes. A projeção 
+é injetada no Viewport para podermos deter os ladrilhos (Tiles) que estão sendo 
+vistos e para extrair o viewport. Com a lista de ladrilhos vistos e sabendo a 
+URL para seus respectivos arquivos de vídeo, a classe TileStitcher gerencia e
+sincroniza o fluxo de quadros de todos os ladrilhos a fim de reconstruir a projeção 
+com apenas os ladrilhos selecionados. Em seguida, esta projeção pode ser 
+repassada para classe Viewport para se extrair o que é visto pelo usuário.
+
+<img src="docs/img/classes.png" alt="Descrição" width="300"/>
+
+Para a detecção de visibilidade, consideramos que o campo de visão do usuário é
+uma pirâmide de base quadrada com o topo saindo dos olhos do usuário. Cada face 
+da pirâmide pode ser modelada por quatro planos e cada plano pode ser definido 
+pelas usa sua normal. Um usuário com FOV de 120°x90° em repouso olhando para 
+frente na posição yaw=0, pitch=0 e roll=0 possui as seguintes normais:
+
+$$ 
+n_1 = (x_1, y_1, z_1) = \left(-\cos(\frac{FOV_x}{2}+90°), 0, -\sin(\frac{FOV_x}{2}+90) \right) 
+$$
+
+$$ 
+n_2 = (x_2, y_2, z_2) = \left(\cos(\frac{FOV_x}{2}+90°), 0, -\sin(\frac{FOV_x}{2}+90) \right)
+$$
+
+$$ 
+n_3 = (x_3, y_3, z_3) = \left(0, -\cos(\frac{FOV_y}{2}+90°), -\sin(\frac{FOV_y}{2}+90°) \right) 
+$$
+
+$$ 
+n_4 = (x_4, y_4, z_4) = \left(0, \cos(\frac{FOV_y}{2}+90°), -\sin(\frac{FOV_y}{2}+90°) \right) 
+$$
+
+O viewport é a seção da esfera que
+está dentro da pirâmide. Considerando que as quatro normais estão apontando 
+para fora da pirâmide, um ponto $ \vec{p}=(x, y, z) $ é considerado 
+dentro da pirâmide se satisfazer as quatro equações abaixo:
+
+$$ 
+x_1 \times x + y_1 \times y + z_1 \times z < 0
+$$
+
+$$
+x_2 \times x + y_2 \times y + z_2 \times z < 0 
+$$
+
+$$
+x_3 \times x + y_3 \times y + z_3 \times z < 0 
+$$
+
+$$
+x_4 \times x + y_4 \times y + z_4 \times z < 0 
+$$
+
+Por questões de eficiência, não necessário testar todos os pixels de um ladriho 
+para verificar se ele está sendo visto, basta testar as bordas. Já vi alguns 
+trabalhos selecionarem vários pontos dentro do ladrilho, mas acho isso impreciso 
+e só justificado se o sistema estiver muito lento.
+
+<img src="docs/img/get_tiles.png" alt="Descrição" width="300"/>
+
+Para extrair o viewport de uma projeção partimos de uma imagem em branco. 
+Convertemos as coordenadas dos pixels do viewport (0, 0), ..., (0, m), ..., 
+(n, 0), ... (n, m) em coordenadas cartesianas (x, y, z). Em seguida de coordenadas 
+cartesianas para o domíno da projeção que contem os ladrilhos. Usando a função 
+de [remap do OpenCv](https://docs.opencv.org/4.x/d1/da0/tutorial_remap.html)
+remapeamos os pixels da projeção de volta para o viewport. 
+
+<img src="docs/img/get_viewport.png" alt="Descrição" width="300"/>
+
+Converter de uma projeção em outra o processo é o mesmo. Partimos de uma projeção
+em branco e vamos buscar os valores dos pixels em outra projeção.
+
+<img src="docs/img/convert_projection.png" alt="Descrição" width="300"/>
+
+## API
+
+As projeções são subclasses de
 `py360tools.assets.projection_base.ProjectionBase`
 
 ```python
@@ -84,7 +179,7 @@ import numpy as np
 from py360tools.assets.projection_cmp import CMP
 
 # Create a instance of projection
-cmp = CMP(proj_res=f'600x400', tiling='6x4', fov_res='110x90')
+cmp = CMP(proj_res=f'600x400', tiling='6x4')
 
 # Define the viewport position (in rads)
 cmp.yaw_pitch_roll = np.deg2rad((70, 0, 0))
