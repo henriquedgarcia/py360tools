@@ -93,6 +93,10 @@ em branco e vamos buscar os valores dos pixels em outra projeção.
 
 <img src="docs/img/convert_projection.png" alt="Descrição" width="300"/>
 
+Classe para remontar o fluxo de streaming do stiles em projeção. Ela gerencia os múltiplos fluxos dos ladrilhos sincronizando todos. 
+
+<img src="docs/img/tile_stitcher.png" alt="Descrição" width="300"/>
+
 ## API
 
 As projeções são subclasses de
@@ -197,7 +201,7 @@ import numpy as np
 from PIL import Image
 import py360tools.draw as draw
 
-from py360tools.assets.projection_cmp import CMP
+from py360tools import CMP, Viewport
 
 # Open a projection frame
 projection_array = np.array(Image.open('images/cmp1.png'))
@@ -228,7 +232,7 @@ Image.fromarray(projection_array).show()
 import numpy as np
 from PIL import Image
 
-from py360tools.assets.projection_cmp import CMP
+from py360tools import CMP, Viewport
 
 # Open a projection frame
 frame_img = Image.open('images/cmp1.png')
@@ -275,3 +279,63 @@ Image.fromarray(vp_image).show()
 - `cd py360tools`
 - `pip install -e .`
 
+## Cite
+
+Por favor, cite o trabalho abaixo caso você use esta ferramenta na sua pesquisa.
+
+Referência:
+
+```
+Garcia, H. D., Carvalho, M. M. py360tool: Um Framework para Manipulação de Vídeo 360° com Ladrilhos. XXIV Workshop de Ferramentas e Aplicações (WFA 2025). Anais Estendidos do
+XXXI Simpósio Brasileiro de Sistemas Multimídia e Web (WFA’2025). ISSN 2596-1683. Rio de Janeiro/RJ. (2025)
+```
+
+BibTex:
+
+```bibtex
+@inproceedings{Garcia2025,
+   abstract = {The streaming of 360 ∘ videos is one of the most bandwidth-demanding virtual reality (VR) applications, as the video must be encoded in ultra-high resolution to ensure an im-mersive experience. To optimize its transmission, current approaches partition the spherical video into tiles, which are encoded at different bitrates and selectively delivered, based on the viewing direction of the user (viewport). The complexity of this architecture, which involves viewport prediction , tile selection, bit rate adaptation, and handling of parallel streaming, requires new tools to evaluate quality of experience (QoE) and quality of service (QoS), especially due to its interactive nature and low reproducibility. This work introduces py360tools, a Python library to handle tile-based 360 ∘ video streaming. The library automates key client-side tasks, such as spherical projection reconstruction, viewport extraction, and tile selection, facilitating the playback and simulation of streaming sessions. Furthermore, py360tools offers a flexible architecture, enabling efficient analysis of different projections and tiling strategies.},
+   author = {Henrique D Garcia and Marcelo M Carvalho},
+   city = {Rio de Janeiro},
+   doi = {https://doi.org/10.48550/arXiv.2508.17428},
+   issn = {2596-1683},
+   booktitle = {Anais Estendidos do XXXI Simpósio Brasileiro de Sistemas Multimídia e Web (WFA’2025)},
+   keywords = {Qualidade de Experiência,Qualidade de Serviço,Realidade Virtual,Streaming de Vídeo 360 ∘,Taxa de Bits Adaptativa},
+   month = {11},
+   pages = {1-4},
+   publisher = {Brazilian Computer Society},
+   title = {py360tool: Um Framework para Manipulação de Vídeo 360 ∘ com Ladrilhos},
+   url = {https://www.meta.com/quest/quest-3/},
+   year = {2025}
+}
+
+```
+
+## py360tools Viewer
+
+Um visualizador de demonstração da emulação do streming de vídeo 360º com ladrilhos. Disponível em: [Github - Py360tools Viewper](https://github.com/henriquedgarcia/py360tools_viewer) 
+
+<img src="docs/img/py360tools_ui.png" alt="Descrição" width="300"/>
+
+O py360tools Viewer recebe uma lista com os ladrilhos que serão vistos neste chunk e abre dois streams: um com a qualidade selecionada e outro de referência.
+São calculados os MSEs dos ladrilhos e então calculada a média entre eles. Em seguida as projeções são extraídas o viewport que é usado par calcular o MSE.
+Além do MSE médio dos ladrilhos e do MSE do viewport o visualizador ainda exibe o numero de ladrilhos selecionados e sua taxa de bits.
+
+<img src="docs/img/aplicacao.png" alt="Descrição" width="300"/>
+
+O JSON de entrada deve conter algumas informações básicas sobre as representações disponíveis, de forma semelhante ao DASH.
+
+O segment_template deve conter obrigatoriamente as chaves:
+
+- {tile} - Um identificador (espacial) do arquivo de ladrilho
+- {quality} - Um identificador (qualidade) do fator de qualidade usado na codificação
+- {chunk} - Um identificador (temporal) do chunk que será acessado.
+
+
+<img src="docs/img/json_config.png" alt="Descrição" width="300"/>
+
+O dataset do movimento de cabeça deve ser um pandas dataframe com multiindex serializado com HDF5 (chave única). O dataset deve conter uma amostra por quadro. Os campos do índice são "nome", "usuario" e "frame". A tabela possui três colunas ("yaw", "pitch", "roll") em radianos.
+
+<img src="docs/img/hm_dataset.png" alt="Descrição" width="300"/>
+
+Mais descrições em breve no Github do projeto.
