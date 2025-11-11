@@ -7,6 +7,9 @@
 - [Outras Funções](#other-functions)
 - [Dependências](#depends)
 - [Instalação](#install)
+- [Referência](#cite)
+- [Apresentação Completa](#py360tools-viewer)
+- [py360tools Viewer](#py360tools-viewer)
 
 ## Introdução
 
@@ -310,6 +313,9 @@ BibTex:
 }
 
 ```
+## Full Presentation
+
+Disponível em: [Github - Py360tools Presentation](https://github.com/henriquedgarcia/apresentacao-py360tools)
 
 ## py360tools Viewer
 
