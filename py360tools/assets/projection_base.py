@@ -9,38 +9,6 @@ from ..utils import create_nm_coords, splitx
 from ..utils.util import get_borders_coord_nm
 
 
-class Tile:
-    def __init__(self, idx: int = None,
-                 shape: Union[np.ndarray] = None,
-                 position: Union[np.ndarray, tuple[int, int]] = None,
-                 path: Path = None,
-                 canvas: np.ndarray = None):
-        self.idx = idx
-        self.shape = np.array(shape)
-        self.position = np.array(position)
-        self.path = path
-        self.canvas = canvas
-
-    @cached_property
-    def borders(self) -> Union[np.ndarray, tuple[int, int]]:
-        borders_coord_nm = get_borders_coord_nm(self.position, self.shape)
-        borders_coord_nm = borders_coord_nm.astype(int)
-        return borders_coord_nm
-
-    def __hash__(self):
-        return hash(f'{self.idx}@{self.position}@{self.shape}')
-
-    def __str__(self):
-        return f'{self.idx}'
-
-    def __repr__(self):
-        return f'Tile(id{self.idx}-{self.position}@{self.shape})'
-
-    def __int__(self):
-        return self.idx
-
-    def __float__(self):
-        return float(self.idx)
 
 
 class Projection(ABC):
