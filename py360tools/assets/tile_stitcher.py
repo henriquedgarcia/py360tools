@@ -2,8 +2,8 @@ from _collections_abc import Iterable
 
 import numpy as np
 from PIL import Image
-from py360tools import ProjectionBase, Tile
-from py360tools.assets.read_video import ReadVideo
+
+from py360tools import Projection, Tile, ReadVideo
 
 
 class TileStitcher:
@@ -21,7 +21,7 @@ class TileStitcher:
     tiles_reader: dict[Tile, ReadVideo] = None
     canvas: np.ndarray = None
 
-    def __init__(self, tiles_seen: list[Tile], proj_obj: ProjectionBase, gray=True):
+    def __init__(self, tiles_seen: list[Tile | int], proj_obj: Projection, gray=True):
         """
         Initializes a new instance of the class, setting up the tile mapping and
         projection resolution for further computations.

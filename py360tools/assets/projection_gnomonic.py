@@ -2,12 +2,12 @@ from functools import cached_property
 
 import numpy as np
 
-from py360tools.assets.projection_base import ProjectionBase
+from py360tools.assets.projection_base import Projection
 from py360tools.transform.transform import ea2xyz, xyz2ea
 from py360tools.utils.util import check_ea
 
 
-class Gnomonic(ProjectionBase):
+class Gnomonic(Projection):
     center_point: tuple[float, float, float]
     fov: np.ndarray  # shape==(3,)
     vp_shape: np.ndarray  # shape==(3,)

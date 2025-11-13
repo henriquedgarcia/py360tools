@@ -43,7 +43,7 @@ class Tile:
         return float(self.idx)
 
 
-class ProjectionBase(ABC):
+class Projection(ABC):
     def __init__(self, *, proj_res, tiling='1x1'):
         """
         tile.position

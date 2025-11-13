@@ -1,10 +1,10 @@
 from py360tools.transform.transform import ea2xyz, xyz2ea
 import numpy as np
 
-from py360tools.assets.projection_base import ProjectionBase
+from py360tools.assets.projection_base import Projection
 
 
-class CMP(ProjectionBase):
+class CMP(Projection):
     def nm2xyz(self, nm):
         nmface = self.nm2nmface(nm=nm, proj_shape=self.shape)
         vuface = self.nmface2vuface(nmface=nmface, proj_shape=self.shape)

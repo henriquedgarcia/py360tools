@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 
 import py360tools.transform
-from py360tools import ProjectionBase
-from py360tools.assets.projection_base import Tile
+from py360tools import Projection, Tile
 from py360tools.transform.transform import get_vptiles
 from py360tools.utils import splitx
 from py360tools.utils.util import get_borders_value
@@ -19,7 +18,7 @@ class Viewport:
     fov: np.ndarray
     vp_shape: np.ndarray
 
-    def __init__(self, resolution, fov, projection: ProjectionBase = None):
+    def __init__(self, resolution, fov, projection: Projection = None):
         """
         Viewport Class used to extract view pixels in projections.
         The vp is an image as numpy-array with shape (H, M, 3).
@@ -30,7 +29,7 @@ class Viewport:
         :param fov: '120x90' for (120°x90°)
         :type fov: str
         :param projection: ERP or CMP objects
-        :type projection: 'ProjectionBase'
+        :type projection: 'Projection'
         """
         self.vp_shape = np.array(splitx(resolution)[::-1])
         self.fov = np.deg2rad(np.array(splitx(fov)[::-1]))

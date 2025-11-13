@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from py360tools import Viewport, ERP, ProjectionBase, TileStitcher, Tile
+from py360tools import Viewport, ERP, Projection, TileStitcher, Tile
 from py360tools.draw import show
 from py360tools.utils import load_test_data
 
@@ -19,7 +19,7 @@ frame_cmp_test_data_file = Path(f'{__ASSETS__}/frame_cmp_test_data.pickle')
 
 
 class TestTileStitcher(unittest.TestCase):
-    projection: ProjectionBase
+    projection: Projection
 
     @classmethod
     def setUpClass(cls):
