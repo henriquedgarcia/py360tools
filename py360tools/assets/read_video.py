@@ -6,28 +6,33 @@ import cv2
 
 class ReadVideo:
     def __init__(self, video_path: Path, gray=True, dtype='float64'):
-        self.cap = cv2.VideoCapture(f'{video_path}')
-        if not self.cap.isOpened():
-            raise ValueError(f"Could not open video file: {video_path}")
+        self.video_path = video_path
         self.gray = gray
         self.dtype = dtype
+        self.stoped = True
+
+    def __iter__(self):
+        self.cap = cv2.VideoCapture(f'{self.video_path}')
+        if not self.cap.isOpened():
+            raise ValueError(f"Could not open video file: {self.video_path}")
+        self.stoped = False
+        return self
 
     def __next__(self):
         """
 
         :return:
         """
+        if self.stoped:
+            raise StopIteration('Iterator not initialized or exhausted. Call iter() first.')
         ok, frame = self.cap.read()
         if not ok:
-            raise StopIteration
+            self.stoped = True
+            raise StopIteration('cv2.VideoCapture is not ok. Probabily is exhausted.')
 
         if self.gray:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return frame.astype(self.dtype)
-
-    def __iter__(self):
-        self.reset() # Ensure we start from the beginning when a new iteration begins
-        return self
 
     def reset(self):
         """
