@@ -2,3 +2,4 @@
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.pickle filter=lfs diff=lfs merge=lfs -text
+*.dia filter=lfs diff=lfs merge=lfs -text
