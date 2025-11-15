@@ -3,9 +3,10 @@ from pathlib import Path
 
 import numpy as np
 
-from py360tools import Viewport, ERP, Projection, TileStitcher, Tile
+from py360tools import ERP, Projection, Tile, TileStitcher, Viewport
 from py360tools.draw import show
 from py360tools.utils import load_test_data
+
 
 show = show
 __FILENAME__ = Path(__file__).absolute()
@@ -38,7 +39,7 @@ class TestTileStitcher(unittest.TestCase):
         tiles_seen_cmp: list[Tile]
         tiles_seen_cmp = self.viewport_cmp.get_vptiles(self.yaw_pitch_roll)
         for tile in tiles_seen_cmp:
-            tile.path = str(__MEDIA__ / f'erp/tile{tile.idx}.mp4')
+            tile.path = Path(__MEDIA__ / f'erp/tile{tile.idx}.mp4')
         tile_stitcher_cmp = TileStitcher(tiles_seen_cmp, self.cmp, gray=True)
 
         # criar iterador
@@ -74,7 +75,7 @@ class TestTileStitcher(unittest.TestCase):
         self.frame_erp_test_data = load_test_data(frame_erp_test_data_file, frame_erp1)
         self.assertTrue(np.array_equal(frame_erp1, self.frame_erp_test_data))
         frame_erp2 = next(tile_stitcher_erp_iter)
-        self.assertFalse(np.array_equal(frame_erp1, frame_erp2))
+        self.assertFalse(np.array_equal(frame_erp2, self.frame_erp_test_data))
         # show(frame_erp1)
 
         # testar reset
@@ -82,4 +83,4 @@ class TestTileStitcher(unittest.TestCase):
         frame_erp1 = next(tile_stitcher_erp_iter)
         self.assertTrue(np.array_equal(frame_erp1, self.frame_erp_test_data))
         frame_erp2 = next(tile_stitcher_erp_iter)
-        self.assertFalse(np.array_equal(frame_erp1, frame_erp2))
+        self.assertFalse(np.array_equal(frame_erp2, self.frame_erp_test_data))
