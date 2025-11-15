@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from pathlib import Path
 from typing import Union
 
 import numpy as np
 
-from ..utils import create_nm_coords, splitx
-from ..utils.util import get_borders_coord_nm
-
-
+from py360tools.assets.tile import Tile
+from py360tools.utils.util import create_nm_coords, splitx
 
 
 class Projection(ABC):
@@ -38,10 +35,7 @@ class Projection(ABC):
         for tile in range(self.n_tile):
             tiling_position = np.unravel_index(tile, self.tiling_shape)  # (n, m)
             position = (tiling_position * self.tile_shape).astype(int)  # (n, m)
-            tile_list.append(Tile(idx=tile,
-                                  shape=self.tile_shape,
-                                  position=position.astype(int),
-                                  ))
+            tile_list.append(Tile(idx=tile, shape=self.tile_shape, position=position.astype(int)))
         return tile_list
 
     @abstractmethod
