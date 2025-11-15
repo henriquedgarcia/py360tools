@@ -4,7 +4,7 @@ from typing import Union
 
 import numpy as np
 
-from py360tools import ReadVideo
+from py360tools.assets.read_video import ReadVideo
 from py360tools.utils.util import get_borders_coord_nm
 
 
