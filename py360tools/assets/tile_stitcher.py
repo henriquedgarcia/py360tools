@@ -101,6 +101,7 @@ class TileStitcher:
     def start_readers(self):
         for tile_int in self.tiles_seen:
             tile_obj: Tile = self.proj_obj.tile_list[int(tile_int)]
+
             # Update reader
             reader = ReadVideo(tile_obj.path, gray=self.gray, dtype='float64')
             tile_obj.reader = iter(reader)
