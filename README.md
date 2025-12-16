@@ -103,11 +103,11 @@ Classe para remontar o fluxo de streaming do stiles em projeção. Ela gerencia 
 ## API
 
 As projeções são subclasses de
-`py360tools.assets.projection_base.ProjectionBase`
+`py360tools.assets.projection_base.Projection`
 
 ```python
 class Viewport:
-    def __init__(self, resolution, fov, projection: ProjectionBase = None):
+    def __init__(self, resolution, fov, projection: Projection = None):
         ...
 ```
 
@@ -119,7 +119,7 @@ class Viewport:
 - `fov`: _str_ <br>
   &nbsp;&nbsp;&nbsp;&nbsp; A string representing the field of view (FOV), e.g.,
   '100x90'.
-- `projection`: _ProjectionBase_ <br>
+- `projection`: _Projection_ <br>
   &nbsp;&nbsp;&nbsp;&nbsp; [Optional] A object representation the projection,
   e.g., ERP, CMP.
 
@@ -147,7 +147,7 @@ class Viewport:
   &nbsp;&nbsp;&nbsp;&nbsp; Coordinates on the 3d cartesian space with shape==(3, ...)
 
 ```python
-class ProjectionBase:
+class Projection:
     def __init__(self, proj_res, fov):
         ...
 ```
