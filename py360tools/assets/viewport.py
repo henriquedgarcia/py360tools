@@ -1,3 +1,4 @@
+import warnings
 from functools import cached_property
 
 import cv2
@@ -87,6 +88,11 @@ class Viewport:
         :rtype: list[Tile]
         :raises ProjectionError: If the projection is not defined.
         """
+        warnings.warn(
+            "get_vptiles() está obsoleto (deprecated) e será removido "
+            "em versões futuras. Use a classe SeenTiles em vez disso.",
+            DeprecationWarning, stacklevel=2)
+
         if yaw_pitch_roll is not None: self.yaw_pitch_roll = yaw_pitch_roll
         vptiles = get_vptiles(self.projection, self)
         return vptiles
