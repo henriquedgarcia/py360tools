@@ -17,8 +17,8 @@ class Tile:
                  reader: ReadVideo = None,
                  ):
         self.idx = idx
-        self.shape = np.array(shape)
-        self.position = np.array(position)
+        self.shape = np.array(shape)        # (H, W)
+        self.position = np.array(position)  # (y, x)
         self.path = path
         self.canvas = canvas
         self.reader = reader
