@@ -1,5 +1,5 @@
 numpy==1.25.2
-pillow==10.4.0
+pillow==12.1.1
 py360tools==0.1.0
 pandas==1.5.3
 opencv-python==4.10.0.84
